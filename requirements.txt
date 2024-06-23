@@ -1,0 +1,6 @@
+warcio
+cdx_toolkit
+duckdb
+pyarrow
+pandas
+polars

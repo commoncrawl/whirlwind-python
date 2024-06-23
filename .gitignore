@@ -1,0 +1,7 @@
+*.cdxj
+construction/*.gz
+CC-MAIN*files
+TEST*.gz
+extraction.*
+testing.*
+whirlwind.parquet
