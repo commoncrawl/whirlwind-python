@@ -30,7 +30,7 @@ are compressed.
 
 You'll see 4 records total, each with a set of warc headers --
 metadata related to that particular record. First is a warcinfo
-record, ever warc has that at the start. Then there are 3 records
+record, every warc has that at the start. Then there are 3 records
 related to fetching a single webpage: the request to the webserver,
 with its http headers; the response from the webserver, with its http
 headers followed by the html; and finally a metadata record related to
@@ -39,7 +39,7 @@ that response.
 Now let's look at whirlwind.warc.wet -- which is in warc format, but
 the thing stored in the record is the extracted text from the html.
 There's a warcinfo record at the start, and then just one record
-for related to our webpage. It's a "conversion" record; it does not
+relating to the webpage. It's a "conversion" record: it does not
 have any http headers, it's just the extracted text.
 
 Finally, open up whirlwind.warc.wat -- also in warc format. This file
@@ -55,7 +55,7 @@ to manipulate these files.
 
 ## Operating system compatibility
 
-I wrote this in Linux. Todo: test it in MacOS. Todo: test in Windows
+This was written in Linux. Todo: test it in MacOS. Todo: test in Windows
 Subsystem for Linux. Todo: test in raw Windows.
 
 ## Set up a virtual environment
@@ -105,7 +105,7 @@ all of them, we could iterate, but what if we wanted random access, to
 just read this one record? We do that with an index. We have two
 of them, let's start with the cdxj index.
 
-Run: `make cdxj` and then `more whirlwind*.cdxj`. You'll that each
+Run: `make cdxj` and then `more whirlwind*.cdxj`. You'll see that each
 file has one entry in the index. The warc only has the response record
 indexed -- we're guessing that you won't ever want to random-access
 the request or metadata. wet and wat have the conversion and metadata
@@ -117,7 +117,7 @@ it's a flat file! It starts with a string like
 blob.
 
 The starting string is the primary key of the index. The first
-thing is a SURT (sort-friendly reordering transform). The big integer
+thing is a SURT (Sort-friendly URI Reordering Transform). The big integer
 is a date, in ISO-8601 format with the delimiters removed.
 
 What is the purpose of this funky format? It's done this way because these
@@ -199,7 +199,7 @@ divided up, but cdx_toolkit hides that detail from you. In order
 to use Athena or duckdb, we need to know what index to query.
 
 This is done by downloading the file collinfo.json from
-index.archive.org, which specifies the start and end of every crawl.
+index.commoncrawl.org, which specifies the start and end of every crawl.
 
 Run `make download_collinfo`
 
@@ -218,7 +218,7 @@ then here's the best choice:
 
 Run `make duck_s3_ls_then_cloudfront`
 
-On my machine (with a 1 gigabit network and many cores), this takes 1
+On a machine with a 1 gigabit network connection, and many cores, this takes 1
 minute total, and uses 8 cores.
 
 If you want to run several of these queries, you'll want to download
