@@ -111,6 +111,10 @@ indexed -- we're guessing that you won't ever want to random-access
 the request or metadata. wet and wat have the conversion and metadata
 records indexed.
 
+NOTE: only the warc index is made public today. Historically, we have
+not indexed wat/wet files - but we are starting to. These wat/wet
+indexes may or may not be made public later.
+
 For each of these records, there's one text line in the index -- yes,
 it's a flat file! It starts with a string like
 `org,wikipedia,an)/wiki/escopete 20240518015810` followed by a json
@@ -183,8 +187,10 @@ index query, to make a http byte range request to S3 to download this
 single record.
 
 It is only downloading the warc record, because our actual cdx index
-only has the response records in it. You cannot random access the
-wet and wat records due to lack of an index.
+only has the response records in it. The public cannot random access the
+wet and wat records due to lack of an index. We do have these indexes
+internally though, if you need them. This may change in future if we
+make the wat/wet indexes public.
 
 ## The columnar index
 
