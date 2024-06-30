@@ -10,7 +10,7 @@ columnar index.
 
 The object of this whirlwind tour is to show you how a single webpage
 appears in all of these different places. It uses python-based tools
-such as warcio, cdxj-indexer, cdx_toolkit, and duckdb.
+such as [warcio](https://github.com/webrecorder/warcio), [cdxj-indexer](https://github.com/webrecorder/cdxj-indexer), [cdx_toolkit](https://github.com/cocrawler/cdx_toolkit), and [duckdb](https://duckdb.org/).
 
 That webpage is [https://an.wikipedia.org/wiki/Escopete](https://an.wikipedia.org/wiki/Escopete),
 which we crawled on the date 2024-05-18T01:58:10Z.
@@ -93,7 +93,7 @@ The output has 3 sections, one each for the warc, wet, and wat. It prints
 the record types, you've seen these before. And for the record types
 that have an Target-URI as part of their warc headers, it prints that URI.
 
-Take a look at the program `warc-iterator.py`. It's a very simple example
+Take a look at the program `warcio-iterator.py`. It's a very simple example
 of how to iterate over all of the records in a warc file.
 
 ## Index warc, wet, and wat
