@@ -117,21 +117,22 @@ it's a flat file! It starts with a string like
 blob.
 
 The starting string is the primary key of the index. The first
-thing is a [SURT](http://crawler.archive.org/articles/user_manual/glossary.html#surt) (Sort-friendly URI Reordering Transform). The big integer
+thing is a [SURT](http://crawler.archive.org/articles/user_manual/glossary.html#surt)
+(Sort-friendly URI Reordering Transform). The big integer
 is a date, in ISO-8601 format with the delimiters removed.
 
 What is the purpose of this funky format? It's done this way because these
 flat files -- 300 gigabytes per crawl -- can be sorted on the primary key
-using the standard Linux `sort` utility. Then it's stored in a funky
-format called a zipnum, and that's how our cdx index server works.
+using the standard Linux `sort` utility.
 
 The json blob has enough information to extract individual records -- it
 says which warc the record is in, and the offset and length of the record.
 We'll use that in the next section.
 
-Wayback machines (such as the Internet Archive's wayback at
-https://web.archive.org/) are often powered by a cdx index
-server.
+Later, we take these sorted files, convert them to an even more efficient format 
+(zipnum) which allows our cdx index server to serve up these indexes very 
+efficiently. Wayback machines (such as the Internet Archive's wayback at
+https://web.archive.org/) are often powered by a cdx index server.
 
 ## Extract the raw content from local warc, wet, wat
 
