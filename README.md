@@ -117,7 +117,7 @@ it's a flat file! It starts with a string like
 blob.
 
 The starting string is the primary key of the index. The first
-thing is a SURT (Sort-friendly URI Reordering Transform). The big integer
+thing is a [SURT](http://crawler.archive.org/articles/user_manual/glossary.html#surt) (Sort-friendly URI Reordering Transform). The big integer
 is a date, in ISO-8601 format with the delimiters removed.
 
 What is the purpose of this funky format? It's done this way because these
