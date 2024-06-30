@@ -4,3 +4,4 @@ duckdb
 pyarrow
 pandas
 polars
+cdxj-indexer
