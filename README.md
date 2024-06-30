@@ -164,6 +164,12 @@ using for this whirlwind tour:
 
 Run `make cdx_toolkit`
 
+NOTE: this command may take a few minutes to run. It may also show
+errors such as:
+"Failed to establish a new connection: [Errno 61] Connection refused'
+This may or may not happen to you, and is due to the rate limiting
+in place on our index server.
+
 The command lines for these `cdxt` commands specifies the exact URL
 we've been using all along, and the particular date of its
 capture, 20240518015810. The output is a warc file
