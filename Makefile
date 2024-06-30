@@ -82,7 +82,7 @@ wreck_the_warc:
 	gzip testing.warc
 	@echo
 	@echo iterating over this compressed warc fails
-	python ./warcio-iterator.py testing.warc.gz || /bin/true
+	python ./warcio-iterator.py testing.warc.gz || true
 	@echo
 	@echo "now let's do it the right way"
 	gunzip testing.warc.gz
