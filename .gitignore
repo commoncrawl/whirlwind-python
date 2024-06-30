@@ -5,4 +5,4 @@ TEST*.gz
 extraction.*
 testing.*
 whirlwind.parquet
-colinfo.json
+collinfo.json
