@@ -39,10 +39,12 @@ extract:
 cdx_toolkit:
 	@echo look up this capture in the comoncrawl cdx index
 	cdxt --cc --from 20240518015810 --to 20240518015810 iter an.wikipedia.org/wiki/Escopete
+	sleep 5
 	@echo
 	@echo extract the content from the commoncrawl s3 bucket
 	rm -f TEST-000000.extracted.warc.gz
 	cdxt --cc --from 20240518015810 --to 20240518015810 warc an.wikipedia.org/wiki/Escopete
+	sleep 5
 	@echo
 	@echo index this new warc
 	cdxj-indexer TEST-000000.extracted.warc.gz  > TEST-000000.extracted.warc.cdxj
@@ -55,6 +57,7 @@ cdx_toolkit:
 download_collinfo:
 	@echo downloading collinfo.json so we can find out the crawl name
 	wget https://index.commoncrawl.org/collinfo.json
+	sleep 5
 
 duck_local_files:
 	@echo "warning! 300 gigabyte download"
