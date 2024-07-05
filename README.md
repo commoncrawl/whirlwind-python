@@ -10,7 +10,7 @@ columnar index.
 
 The object of this whirlwind tour is to show you how a single webpage
 appears in all of these different places. It uses python-based tools
-such as warcio, cdxj-indexer, cdx_toolkit, and duckdb.
+such as [warcio](https://github.com/webrecorder/warcio), [cdxj-indexer](https://github.com/webrecorder/cdxj-indexer), [cdx_toolkit](https://github.com/cocrawler/cdx_toolkit), and [duckdb](https://duckdb.org/).
 
 That webpage is [https://an.wikipedia.org/wiki/Escopete](https://an.wikipedia.org/wiki/Escopete),
 which we crawled on the date 2024-05-18T01:58:10Z.
@@ -93,7 +93,7 @@ The output has 3 sections, one each for the warc, wet, and wat. It prints
 the record types, you've seen these before. And for the record types
 that have an Target-URI as part of their warc headers, it prints that URI.
 
-Take a look at the program `warc-iterator.py`. It's a very simple example
+Take a look at the program `warcio-iterator.py`. It's a very simple example
 of how to iterate over all of the records in a warc file.
 
 ## Index warc, wet, and wat
@@ -111,27 +111,26 @@ indexed -- we're guessing that you won't ever want to random-access
 the request or metadata. wet and wat have the conversion and metadata
 records indexed.
 
+(Note: CCF doesn't publish a wet or wat index, just warc.)
+
 For each of these records, there's one text line in the index -- yes,
 it's a flat file! It starts with a string like
 `org,wikipedia,an)/wiki/escopete 20240518015810` followed by a json
 blob.
 
 The starting string is the primary key of the index. The first
-thing is a SURT (Sort-friendly URI Reordering Transform). The big integer
+thing is a [SURT](http://crawler.archive.org/articles/user_manual/glossary.html#surt)
+(Sort-friendly URI Reordering Transform). The big integer
 is a date, in ISO-8601 format with the delimiters removed.
 
-What is the purpose of this funky format? It's done this way because these
-flat files -- 300 gigabytes per crawl -- can be sorted on the primary key
-using the standard Linux `sort` utility. Then it's stored in a funky
-format called a zipnum, and that's how our cdx index server works.
+What is the purpose of this funky format? It's done this way because
+these flat files (300 gigabytes total per crawl) can be sorted on the
+primary key using any out-of-core sort utility -- like the standard
+Linux `sort`, or one of the Hadoop-based out-of-core sort functions.
 
-The json blob has enough information to extract individual records -- it
-says which warc the record is in, and the offset and length of the record.
-We'll use that in the next section.
-
-Wayback machines (such as the Internet Archive's wayback at
-https://web.archive.org/) are often powered by a cdx index
-server.
+The json blob has enough information to extract individual records --
+it says which warc file the record is in, and the offset and length of
+the record. We'll use that in the next section.
 
 ## Extract the raw content from local warc, wet, wat
 
@@ -170,14 +169,16 @@ TEST-000000.extracted.warc.gz, with this one record plus a warcinfo
 record explaining what this warc is. The Makefile target also runs
 cdxj-indexer on this new warc, and iterates over it.
 
-If you dig into the code of cdx_toolkit's code, you'll find that it is
-using the offset and length of the warc record, returned by the cdx
-index query, to make a http byte range request to S3 to download this
-single record.
+If you dig into cdx_toolkit's code, you'll find that it is using the
+offset and length of the warc record, returned by the cdx index query,
+to make a http byte range request to S3 to download this single warc
+record.
 
-It is only downloading the warc record, because our actual cdx index
-only has the response records in it. You cannot random access the
-wet and wat records due to lack of an index.
+It is only downloading the response warc record, because our
+cdx index only has the response records indexed. The public cannot
+random access the wet and wat records due to lack of an index. We do
+have these indexes internally though, if you need them. This may
+change in future if we make the wat/wet indexes public.
 
 ## The columnar index
 
