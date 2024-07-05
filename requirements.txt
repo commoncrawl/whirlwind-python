@@ -1,5 +1,6 @@
 warcio
 cdx_toolkit
+cdxj-indexer
 duckdb
 pyarrow
 pandas
