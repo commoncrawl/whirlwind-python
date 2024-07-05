@@ -111,9 +111,7 @@ indexed -- we're guessing that you won't ever want to random-access
 the request or metadata. wet and wat have the conversion and metadata
 records indexed.
 
-NOTE: only the warc index is made public today. Historically, we have
-not indexed wat/wet files - but we are starting to. These wat/wet
-indexes may or may not be made public later.
+(Note: CCF doesn't publish a wet or wat index, just warc.)
 
 For each of these records, there's one text line in the index -- yes,
 it's a flat file! It starts with a string like
@@ -125,18 +123,14 @@ thing is a [SURT](http://crawler.archive.org/articles/user_manual/glossary.html#
 (Sort-friendly URI Reordering Transform). The big integer
 is a date, in ISO-8601 format with the delimiters removed.
 
-What is the purpose of this funky format? It's done this way because these
-flat files -- 300 gigabytes per crawl -- can be sorted on the primary key
-using the standard Linux `sort` utility.
+What is the purpose of this funky format? It's done this way because
+these flat files (300 gigabytes total per crawl) can be sorted on the
+primary key using any out-of-core sort utility -- like the standard
+Linux `sort`, or one of the Hadoop-based out-of-core sort functions.
 
-The json blob has enough information to extract individual records -- it
-says which warc the record is in, and the offset and length of the record.
-We'll use that in the next section.
-
-Later, we take these sorted files, convert them to an even more efficient format 
-(zipnum) which allows our cdx index server to serve up these indexes very 
-efficiently. Wayback machines (such as the Internet Archive's wayback at
-https://web.archive.org/) are often powered by a cdx index server.
+The json blob has enough information to extract individual records --
+it says which warc file the record is in, and the offset and length of
+the record. We'll use that in the next section.
 
 ## Extract the raw content from local warc, wet, wat
 
@@ -168,12 +162,6 @@ using for this whirlwind tour:
 
 Run `make cdx_toolkit`
 
-NOTE: this command may take a few minutes to run. It may also show
-errors such as:
-"Failed to establish a new connection: [Errno 61] Connection refused'
-This may or may not happen to you, and is due to the rate limiting
-in place on our index server.
-
 The command lines for these `cdxt` commands specifies the exact URL
 we've been using all along, and the particular date of its
 capture, 20240518015810. The output is a warc file
@@ -181,16 +169,16 @@ TEST-000000.extracted.warc.gz, with this one record plus a warcinfo
 record explaining what this warc is. The Makefile target also runs
 cdxj-indexer on this new warc, and iterates over it.
 
-If you dig into the code of cdx_toolkit's code, you'll find that it is
-using the offset and length of the warc record, returned by the cdx
-index query, to make a http byte range request to S3 to download this
-single record.
+If you dig into cdx_toolkit's code, you'll find that it is using the
+offset and length of the warc record, returned by the cdx index query,
+to make a http byte range request to S3 to download this single warc
+record.
 
-It is only downloading the warc record, because our actual cdx index
-only has the response records in it. The public cannot random access the
-wet and wat records due to lack of an index. We do have these indexes
-internally though, if you need them. This may change in future if we
-make the wat/wet indexes public.
+It is only downloading the response warc record, because our
+cdx index only has the response records indexed. The public cannot
+random access the wet and wat records due to lack of an index. We do
+have these indexes internally though, if you need them. This may
+change in future if we make the wat/wet indexes public.
 
 ## The columnar index
 
