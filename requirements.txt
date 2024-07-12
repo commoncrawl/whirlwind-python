@@ -1,3 +1,4 @@
+setuptools
 warcio
 cdx_toolkit
 cdxj-indexer
