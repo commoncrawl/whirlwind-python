@@ -55,8 +55,11 @@ def get_files(algo, crawl):
         with open(file_file) as fd:
             files = fd.read().splitlines()
             files = [external_prefix+f.split()[3] for f in files]
+        if not files:
+            raise ValueError(f'{file_file} is empty')
+
     else:
-        raise NotImplementedError('algo: '+algo)
+        raise NotImplementedError(f'algo: {algo}')
     return files
 
 

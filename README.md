@@ -226,6 +226,8 @@ then here's the best choice:
 
 Run `make duck_s3_ls_then_cloudfront`
 
+**Note:** You need a valid AWS credentials to run this command.
+
 On a machine with a 1 gigabit network connection, and many cores, this takes 1
 minute total, and uses 8 cores.
 
