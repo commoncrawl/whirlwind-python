@@ -21,6 +21,13 @@ Makefile, so it would be nice if you had "make" on your system.
 
 Ready? Here we go!
 
+## Notes for Mac OS
+
+```
+brew install virtualenv
+brew install awscli
+```
+
 ## Look at the example files in an editor
 
 warc files are a container that holds files, similar to zip and tar files.
