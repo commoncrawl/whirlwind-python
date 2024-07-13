@@ -6,3 +6,9 @@ extraction.*
 testing.*
 whirlwind.parquet
 collinfo.json
+
+# Ignore virtual environment
+.venv/
+
+# Ignore VS Code settings
+.vscode/

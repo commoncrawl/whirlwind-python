@@ -1,10 +1,9 @@
 venv:
-	@echo "making a venv in ~/venv/whirlwind"
-	mkdir -p ~/venv
-	virtualenv -p python ~/venv/whirlwind
+	@echo "making a venv in ./.venv"
+	python3 -m venv .venv
 	@echo
 	@echo "now you have to activate it:"
-	@echo ". ~/venv/whirlwind/bin/activate"
+	@echo "source .venv/bin/activate"
 	@echo
 
 install:
@@ -55,8 +54,15 @@ cdx_toolkit:
 	@echo
 
 download_collinfo:
-	@echo downloading collinfo.json so we can find out the crawl name
-	wget https://index.commoncrawl.org/collinfo.json
+	@echo "downloading collinfo.json so we can find out the crawl name"
+	@if command -v wget > /dev/null 2>&1; then \
+		wget https://index.commoncrawl.org/collinfo.json; \
+	elif command -v curl > /dev/null 2>&1; then \
+		curl -O https://index.commoncrawl.org/collinfo.json; \
+	else \
+		echo "Error: neither wget nor curl is installed."; \
+		exit 1; \
+	fi
 	sleep 5
 
 duck_local_files:
