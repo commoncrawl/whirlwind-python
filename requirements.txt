@@ -6,3 +6,4 @@ pyarrow
 pandas
 polars
 cdxj-indexer
+setuptools

@@ -21,6 +21,13 @@ Makefile, so it would be nice if you had "make" on your system.
 
 Ready? Here we go!
 
+## Notes for Mac OS
+
+```
+brew install virtualenv
+brew install awscli
+```
+
 ## Look at the example files in an editor
 
 warc files are a container that holds files, similar to zip and tar files.
@@ -218,6 +225,8 @@ don't have a lot of disk space and you do have a lot of time,
 then here's the best choice:
 
 Run `make duck_s3_ls_then_cloudfront`
+
+**Note:** You need a valid AWS credentials to run this command.
 
 On a machine with a 1 gigabit network connection, and many cores, this takes 1
 minute total, and uses 8 cores.
