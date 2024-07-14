@@ -55,14 +55,7 @@ cdx_toolkit:
 
 download_collinfo:
 	@echo "downloading collinfo.json so we can find out the crawl name"
-	@if command -v wget > /dev/null 2>&1; then \
-		wget https://index.commoncrawl.org/collinfo.json; \
-	elif command -v curl > /dev/null 2>&1; then \
-		curl -O https://index.commoncrawl.org/collinfo.json; \
-	else \
-		echo "Error: neither wget nor curl is installed."; \
-		exit 1; \
-	fi
+	curl -O https://index.commoncrawl.org/collinfo.json;
 	sleep 5
 
 duck_local_files:
