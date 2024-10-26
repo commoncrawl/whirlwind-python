@@ -6,3 +6,5 @@ extraction.*
 testing.*
 whirlwind.parquet
 collinfo.json
+.venv/
+.vscode/

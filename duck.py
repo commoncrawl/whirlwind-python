@@ -3,6 +3,7 @@ import json
 import os.path
 import subprocess
 import sys
+import gzip
 
 import duckdb
 
@@ -14,14 +15,14 @@ def advice(prefix, crawl):
     print(f' aws s3 sync s3://commoncrawl/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/ .')
 
 
-all_algos = ('s3_glob', 'local_files', 'ccf_local_files', 'cloudfront_glob', 's3_ls_then_cloudfront')
+all_algos = ('s3_glob', 'local_files', 'ccf_local_files', 'cloudfront_glob', 'cloudfront')
 
 
 def get_files(algo, crawl):
     if algo == 's3_glob':
-        # 403 errors with and without credentials
+        # 403 errors with and without credentials. you have to be commoncrawl-pds
         files = f's3://commoncrawl/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/*.parquet'
-        raise NotImplemented('will cause a 403')
+        raise NotImplementedError('will cause a 403')
     elif algo == 'local_files':
         files = f'~/commmoncrawl/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/*.parquet'
         files = glob.glob(files)
@@ -35,26 +36,17 @@ def get_files(algo, crawl):
             advice('/home/cc-pds', crawl)
             exit(1)
     elif algo == 'cloudfront_glob':
-        # duckdb can't glob this
+        # duckdb can't glob this, same reason as s3_glob above
         files = f'https://data.commoncrawl.org/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/*.parquet'
-        raise NotImplemented('duckdb will throw an error because it cannot glob this')
-    elif algo == 's3_ls_then_cloudfront':
+        raise NotImplementedError('duckdb will throw an error because it cannot glob this')
+    elif algo == 'cloudfront':
         prefix = f's3://commoncrawl/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/'
         external_prefix = f'https://data.commoncrawl.org/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/'
-        file_file = f'{crawl}.files'
+        file_file = f'{crawl}.warc.paths.gz'
 
-        # download if we haven't already
-        if not os.path.isfile(file_file):
-            print('downloading index file list from s3')
-            cmd = f'aws s3 ls {prefix} > ' + file_file
-            subprocess.run(cmd, shell=True, check=True)
-        else:
-            print('using cached index file list from s3')
-
-        # and then use it
-        with open(file_file) as fd:
+        with gzip.open(file_file, mode='rt', encoding='utf8') as fd:
             files = fd.read().splitlines()
-            files = [external_prefix+f.split()[3] for f in files]
+            files = [external_prefix+f for f in files]
     else:
         raise NotImplementedError('algo: '+algo)
     return files
@@ -130,7 +122,7 @@ if __name__ == '__main__':
             print('possible algos:', all_algos)
             exit(1)
     else:
-        algo = 's3_ls_then_cloudfront'
+        algo = 'cloudfront'
         print('using algo: ', algo)
 
     main(algo, crawl)

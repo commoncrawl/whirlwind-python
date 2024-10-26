@@ -4,8 +4,7 @@ venv:
 	virtualenv -p python ~/venv/whirlwind
 	@echo
 	@echo "now you have to activate it:"
-	@echo ". ~/venv/whirlwind/bin/activate"
-	@echo
+	@echo "source ~/venv/whirlwind/bin/activate"
 
 install:
 	pip install -r requirements.txt
@@ -39,12 +38,10 @@ extract:
 cdx_toolkit:
 	@echo look up this capture in the comoncrawl cdx index
 	cdxt --cc --from 20240518015810 --to 20240518015810 iter an.wikipedia.org/wiki/Escopete
-	sleep 5
 	@echo
 	@echo extract the content from the commoncrawl s3 bucket
 	rm -f TEST-000000.extracted.warc.gz
 	cdxt --cc --from 20240518015810 --to 20240518015810 warc an.wikipedia.org/wiki/Escopete
-	sleep 5
 	@echo
 	@echo index this new warc
 	cdxj-indexer TEST-000000.extracted.warc.gz  > TEST-000000.extracted.warc.cdxj
@@ -55,21 +52,25 @@ cdx_toolkit:
 	@echo
 
 download_collinfo:
-	@echo downloading collinfo.json so we can find out the crawl name
-	wget https://index.commoncrawl.org/collinfo.json
-	sleep 5
+	@echo "downloading collinfo.json so we can find out the crawl name"
+	curl -O https://index.commoncrawl.org/collinfo.json
+
+CC-MAIN-2024-22.warc.paths.gz:
+	@echo "downloading the list from s3, requires s3 auth even though it is free"
+	@echo "note that this file should be in the repo"
+	 aws s3 ls s3://commoncrawl/cc-index/table/cc-main/warc/crawl=CC-MAIN-2024-22/subset=warc/ | awk '{print $$4}' | gzip -9 > CC-MAIN-2024-22.warc.paths.gz
 
 duck_local_files:
 	@echo "warning! 300 gigabyte download"
 	python duck.py local_files
 
 duck_ccf_local_files:
-	@echo "warning! only works on greg's development machine"
+	@echo "warning! only works on Common Crawl Foundadtion's development machine"
 	python duck.py ccf_local_files
 
-duck_s3_ls_then_cloudfront:
+duck_cloudfront:
 	@echo "warning! this might take 1-10 minutes"
-	python duck.py s3_ls_then_cloudfront
+	python duck.py cloudfront
 
 wreck_the_warc:
 	@echo
