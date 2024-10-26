@@ -511,6 +511,67 @@ Run
 
 ```make wreck_the_warc```
 
+```
+we will break and then fix this warc
+cp whirlwind.warc.gz testing.warc.gz
+rm -f testing.warc
+gunzip testing.warc.gz
+
+iterate over this uncompressed warc: works
+python ./warcio-iterator.py testing.warc
+  WARC-Type: warcinfo
+  WARC-Type: request
+    WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
+  WARC-Type: response
+    WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
+  WARC-Type: metadata
+    WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
+
+compress it the wrong way
+gzip testing.warc
+
+iterating over this compressed warc fails
+python ./warcio-iterator.py testing.warc.gz || /usr/bin/true
+  WARC-Type: warcinfo
+Traceback (most recent call last):
+  File "/home/ccgreg/github/whirlwind-python/./warcio-iterator.py", line 9, in <module>
+    for record in ArchiveIterator(stream):
+  File "/home/ccgreg/venv/whirlwind/lib/python3.10/site-packages/warcio/archiveiterator.py", line 112, in _iterate_records
+    self._raise_invalid_gzip_err()
+  File "/home/ccgreg/venv/whirlwind/lib/python3.10/site-packages/warcio/archiveiterator.py", line 153, in _raise_invalid_gzip_err
+    raise ArchiveLoadFailed(msg)
+warcio.exceptions.ArchiveLoadFailed:
+    ERROR: non-chunked gzip file detected, gzip block continues
+    beyond single record.
+
+    This file is probably not a multi-member gzip but a single gzip file.
+
+    To allow seek, a gzipped WARC must have each record compressed into
+    a single gzip member and concatenated together.
+
+    This file is likely still valid and can be fixed by running:
+
+    warcio recompress <path/to/file> <path/to/new_file>
+
+
+
+now let's do it the right way
+gunzip testing.warc.gz
+warcio recompress testing.warc testing.warc.gz
+4 records read and recompressed to file: testing.warc.gz
+No Errors Found!
+
+and now iterating works
+python ./warcio-iterator.py testing.warc.gz
+  WARC-Type: warcinfo
+  WARC-Type: request
+    WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
+  WARC-Type: response
+    WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
+  WARC-Type: metadata
+    WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
+```
+
 ## Coda
 
 You have now finished this whirlwind tutorial. If anything
