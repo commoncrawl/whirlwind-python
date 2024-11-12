@@ -33,7 +33,7 @@ Ready? Here we go!
 ## Look at the example files in an editor
 
 WARC files are a container that holds files, similar to zip and tar files.
-Open up whirlwind.warc in your favorite text editor. This is the uncompressed
+Open up `whirlwind.warc` in your favorite text editor. This is the uncompressed
 version of the file -- normally we always work with these files while they
 are compressed.
 
@@ -47,13 +47,13 @@ with its http headers; the response from the webserver, with its http
 headers followed by the html; and finally a metadata record related to
 that response.
 
-Now let's look at whirlwind.warc.wet -- which is in WARC format, but
+Now let's look at `whirlwind.warc.wet` -- which is in WARC format, but
 the thing stored in the record is the extracted text from the html.
 There's a warcinfo record at the start, and then just one record
 relating to the webpage. It's a "conversion" record: it does not
 have any http headers, it's just the extracted text.
 
-Finally, open up whirlwind.warc.wat -- also in WARC format. This file
+Finally, open up `whirlwind.warc.wat` -- also in WARC format. This file
 contains a metadata record for each response in the warc. The metadata
 is stored as json. You might want to feed this json into a
 pretty-printer to read it more easily. For example, you can save just
@@ -76,7 +76,7 @@ installed with `brew install awscli`. You'll also need virtualenv,
 ## Set up a virtual environment
 
 It's a good idea to set up completely separate environments for Python
-project, where you can install things without either changing the
+projects, where you can install things without either changing the
 system Python environment, or any of your other Python projects.
 
 If you already have your own favorite virtual environment scheme, you
@@ -182,7 +182,7 @@ cdxj-indexer --records conversion whirlwind.warc.wet.gz > whirlwind.warc.wet.cdx
 cdxj-indexer whirlwind.warc.wat.gz > whirlwind.warc.wat.cdxj
 ```
 
-Now look at the .cdxj files with `cat whirlwind*.cdxj`. You'll see
+Now look at the `.cdxj` files with `cat whirlwind*.cdxj`. You'll see
 that each file has one entry in the index. The warc only has the
 response record indexed -- by default cdxj-indexer guesses that you
 won't ever want to random-access the request or metadata. wet and wat
@@ -226,7 +226,7 @@ Run:
 ```make extract```
 
 to run a set of extractions from your local
-whirlwind.*.gz files.
+`whirlwind.*.gz` files.
 
 ```
 creating extraction.* from local warcs, the offset numbers are from the cdxj index
@@ -283,7 +283,7 @@ python ./warcio-iterator.py TEST-000000.extracted.warc.gz
 The command lines for these `cdxt` commands specifies the exact URL
 we've been using all along, and the particular date of its
 capture, 20240518015810. The output is a warc file
-TEST-000000.extracted.warc.gz, with this one record plus a warcinfo
+`TEST-000000.extracted.warc.gz`, with this one record plus a warcinfo
 record explaining what this warc is. The Makefile target also runs
 cdxj-indexer on this new warc, and iterates over it.
 
@@ -322,8 +322,8 @@ all of the crawl indexes, because it would be slow. So let's start by
 figuring out which crawl was ongoing on the date 20240518015810, and
 then we'll work with just that one crawl.
 
-To find the crawl name, download the file collinfo.json from
-index.commoncrawl.org. It includes the dates for the the start and end
+To find the crawl name, download the file `collinfo.json` from
+[index.commoncrawl.org](https://index.commoncrawl.org). It includes the dates for the the start and end
 of every crawl.
 
 Run
