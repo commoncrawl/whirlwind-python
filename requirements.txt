@@ -1,10 +1,11 @@
 warcio
 cdx_toolkit
 cdxj-indexer
+legacy-cgi ; python_version > "3.12"
 duckdb
 pyarrow
 pandas
 polars
 cdxj-indexer
 setuptools
-gzip
+gzip ; python_version < "2.5"
