@@ -24,7 +24,7 @@ def get_files(algo, crawl):
         files = f's3://commoncrawl/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/*.parquet'
         raise NotImplementedError('will cause a 403')
     elif algo == 'local_files':
-        files = f'~/commmoncrawl/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/*.parquet'
+        files = os.path.expanduser(f'~/commmoncrawl/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/*.parquet')
         files = glob.glob(files)
         # did we already download? we expect 300 files of about a gigabyte
         if len(files) < 250:
