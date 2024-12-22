@@ -9,15 +9,6 @@ venv:
 install:
 	pip install -r requirements.txt
 
-freeze:
-	@echo pip freeze
-	pip freeze
-	@echo printenv
-	printenv
-	which warcio
-	warcio check whirlwind.warc.gz
-	warcio check -v whirlwind.warc.gz
-
 iterate:
 	@echo iterating over all of the local warcs:
 	@echo
@@ -46,11 +37,12 @@ extract:
 
 cdx_toolkit:
 	@echo look up this capture in the comoncrawl cdx index
-	cdxt --cc --from 20240518015810 --to 20240518015810 iter an.wikipedia.org/wiki/Escopete
+	#cdxt --cc --from 20240518015810 --to 20240518015810 iter an.wikipedia.org/wiki/Escopete
+	cdxt --limit 1 --crawl CC-MAIN-2024-22 --from 20240518015810 --to 20240518015810 iter an.wikipedia.org/wiki/Escopete
 	@echo
 	@echo extract the content from the commoncrawl s3 bucket
 	rm -f TEST-000000.extracted.warc.gz
-	cdxt --cc --from 20240518015810 --to 20240518015810 warc an.wikipedia.org/wiki/Escopete
+	cdxt --limit 1 --crawl CC-MAIN-2024-22 --from 20240518015810 --to 20240518015810 warc an.wikipedia.org/wiki/Escopete
 	@echo
 	@echo index this new warc
 	cdxj-indexer TEST-000000.extracted.warc.gz  > TEST-000000.extracted.warc.cdxj

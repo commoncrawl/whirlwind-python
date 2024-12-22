@@ -40,9 +40,6 @@ jobs:
       - name: Install packages
         run: make install
 
-      - name: check packages
-        run: make freeze
-
       # crash tests from here on out
       - name: make iterate
         run: make iterate
