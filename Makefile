@@ -9,6 +9,9 @@ venv:
 install:
 	pip install -r requirements.txt
 
+freeze:
+	pip freeze
+
 iterate:
 	@echo iterating over all of the local warcs:
 	@echo
