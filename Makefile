@@ -14,6 +14,8 @@ freeze:
 	pip freeze
 	@echo printenv
 	printenv
+	which warcio
+	warcio
 
 iterate:
 	@echo iterating over all of the local warcs:
