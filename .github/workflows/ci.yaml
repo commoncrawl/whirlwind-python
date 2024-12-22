@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+
+jobs:
+  unit-tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      max-parallel: 1  # avoids ever triggering a rate limit
+      matrix:
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
+        os: [ubuntu-latest]
+        EXTRA: [false]  # used to force includes to get included
+        include:
+          - python-version: '3.7'
+            os: ubuntu-20.04  # oldest version on github actions
+            EXTRA: true
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install setuptools on python 3.12+
+        if: ${{ matrix.python-version >= '3.12' }}
+        run: |
+          pip install setuptools
+
+      - name: Install packages
+        run: make install
+
+      - name: lint
+        uses: advanced-security/python-lint-code-scanning-action@v1
+	with:
+	  linter: flake8
+
+      # crash tests from here on out
+      - name: make iterate
+        run: make iterate
+
+      - name: make cdxj
+        run: make cdxj
+
+      - name: make extract
+        run: make extract
+
+      - name: make cdx_toolkit
+        run: make cdx_toolkit
+
+      - name: make download_collinfo
+        run: make download_collinfo
+
+      - name: make duck_cloudfront
+        run: make duck_cloudfront
+
+      - name: make wreck_the_warc
+        run: make wreck_the_warc
