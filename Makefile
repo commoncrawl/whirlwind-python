@@ -10,7 +10,10 @@ install:
 	pip install -r requirements.txt
 
 freeze:
+	@echo pip freeze
 	pip freeze
+	@echo printenv
+	printenv
 
 iterate:
 	@echo iterating over all of the local warcs:

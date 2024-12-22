@@ -40,6 +40,9 @@ jobs:
       - name: Install packages
         run: make install
 
+      - name: check packages
+        run: make freeze
+
       - name: Install linter
         run: pip install flake8
 
