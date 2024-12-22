@@ -40,10 +40,13 @@ jobs:
       - name: Install packages
         run: make install
 
+      - name: Install linter
+        run: pip install flake8
+
       - name: lint
         uses: advanced-security/python-lint-code-scanning-action@v1
-	with:
-	  linter: flake8
+        with:
+          linter: flake8
 
       # crash tests from here on out
       - name: make iterate
