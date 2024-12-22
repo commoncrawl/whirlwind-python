@@ -1,10 +1,8 @@
 warcio
 cdx_toolkit
-cdxj-indexer
 duckdb
 pyarrow
 pandas
 polars
 cdxj-indexer
 setuptools
-gzip
