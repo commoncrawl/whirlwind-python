@@ -15,7 +15,8 @@ freeze:
 	@echo printenv
 	printenv
 	which warcio
-	warcio
+	warcio check whirlwind.warc.gz
+	warcio check -v whirlwind.warc.gz
 
 iterate:
 	@echo iterating over all of the local warcs:
