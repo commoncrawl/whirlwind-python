@@ -72,6 +72,8 @@ duck_ccf_local_files:
 duck_cloudfront:
 	@echo "warning! this might take 1-10 minutes"
 	python duck.py cloudfront
+	@echo "summary of HTTP response codes from the logfile
+	grep -A 1 'HTTP Response:' duck.http.log | sort | uniq -c
 
 wreck_the_warc:
 	@echo
