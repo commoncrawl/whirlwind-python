@@ -89,7 +89,8 @@ def main(algo, crawl):
             break
         except duckdb.HTTPException as e:
             # read_parquet exception seen: HTTPException("HTTP Error: HTTP GET error on 'https://...' (HTTP 403)")
-            print('read_parquet exception seen:', repr(e))
+            print('read_parquet exception seen:', repr(e), file=sys.stderr)
+            print('sleeping for 60s', file=sys.stderr)
             time.sleep(60)
 
     duckdb.sql('SET enable_progress_bar = true;')
@@ -97,8 +98,20 @@ def main(algo, crawl):
     duckdb.sql("SET enable_http_logging = true;SET http_logging_output = 'duck.http.log'")
 
     print('total records for crawl:', crawl)
-    print(duckdb.sql('SELECT COUNT(*) FROM ccindex;'))
-    # duckdb.duckdb.InvalidInputException: Invalid Input Error: No magic bytes found at end of file 'https://...'
+    retries_left = 10
+    while True:
+        try:
+            print(duckdb.sql('SELECT COUNT(*) FROM ccindex;'))
+            break
+        except duckdb.InvalidInputException:
+            # duckdb.duckdb.InvalidInputException: Invalid Input Error: No magic bytes found at end of file 'https://...'
+            print('duckdb exception seen:', repr(e), file=sys.stderr)
+            if retries_left:
+                print('sleeping for 10s', file=sys.stderr)
+                time.sleep(10)
+                retries_left -= 1
+            else:
+                raise
 
     sq2 = f'''
     select
