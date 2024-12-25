@@ -103,7 +103,7 @@ def main(algo, crawl):
         try:
             print(duckdb.sql('SELECT COUNT(*) FROM ccindex;'))
             break
-        except duckdb.InvalidInputException:
+        except duckdb.InvalidInputException as e:
             # duckdb.duckdb.InvalidInputException: Invalid Input Error: No magic bytes found at end of file 'https://...'
             print('duckdb exception seen:', repr(e), file=sys.stderr)
             if retries_left:
