@@ -134,7 +134,19 @@ def main(algo, crawl):
 
     row2 = duckdb.sql(sq2)
     print('our one row')
-    row2.show()
+    while True:
+        try:
+            row2.show()
+            break
+        except duckdb.InvalidInputException as e:
+            # duckdb.duckdb.InvalidInputException: Invalid Input Error: No magic bytes found at end of file 'https://...'
+            print('duckdb exception seen:', repr(e), file=sys.stderr)
+            if retries_left:
+                print('sleeping for 10s', file=sys.stderr)
+                time.sleep(10)
+                retries_left -= 1
+            else:
+                raise
 
     print('writing our one row to a local parquet file, whirlwind.parquet')
     row2.write_parquet('whirlwind.parquet')
