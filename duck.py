@@ -83,6 +83,8 @@ def get_files(algo, crawl):
 
 def main(algo, crawl):
     files = get_files(algo, crawl)
+    retries_left = 100
+
     while True:
         try:
             ccindex = duckdb.read_parquet(files, hive_partitioning=True)
@@ -91,15 +93,19 @@ def main(algo, crawl):
             # read_parquet exception seen: HTTPException("HTTP Error: HTTP GET error on 'https://...' (HTTP 403)")
             # duckdb.duckdb.InvalidInputException: Invalid Input Error: No magic bytes found at end of file 'https://...'
             print('read_parquet exception seen:', repr(e), file=sys.stderr)
-            print('sleeping for 60s', file=sys.stderr)
-            time.sleep(60)
+            if retries_left:
+                print('sleeping for 60s', file=sys.stderr)
+                time.sleep(60)
+                retries_left -= 1
+            else:
+                raise
 
     duckdb.sql('SET enable_progress_bar = true;')
     duckdb.sql('SET http_retries = 100;')
     duckdb.sql("SET enable_http_logging = true;SET http_logging_output = 'duck.http.log'")
 
     print('total records for crawl:', crawl)
-    retries_left = 10
+    retries_left = 100
     while True:
         try:
             print(duckdb.sql('SELECT COUNT(*) FROM ccindex;'))
