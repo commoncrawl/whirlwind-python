@@ -100,7 +100,6 @@ def main(algo, crawl):
             else:
                 raise
 
-    duckdb.sql('.utf8')
     duckdb.sql('SET enable_progress_bar = true;')
     duckdb.sql('SET http_retries = 100;')
     #duckdb.sql("SET enable_http_logging = true;SET http_logging_output = 'duck.http.log'")
