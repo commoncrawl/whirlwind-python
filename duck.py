@@ -87,8 +87,9 @@ def main(algo, crawl):
         try:
             ccindex = duckdb.read_parquet(files, hive_partitioning=True)
             break
-        except duckdb.HTTPException as e:
+        except (duckdb.HTTPException, duckdb.InvalidInputException) as e:
             # read_parquet exception seen: HTTPException("HTTP Error: HTTP GET error on 'https://...' (HTTP 403)")
+            # duckdb.duckdb.InvalidInputException: Invalid Input Error: No magic bytes found at end of file 'https://...'
             print('read_parquet exception seen:', repr(e), file=sys.stderr)
             print('sleeping for 60s', file=sys.stderr)
             time.sleep(60)
