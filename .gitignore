@@ -8,3 +8,4 @@ whirlwind.parquet
 collinfo.json
 .venv/
 .vscode/
+.idea/
