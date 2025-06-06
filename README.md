@@ -87,7 +87,11 @@ Open `whirlwind.warc.wet`: this is the WET derived from our original WARC. We ca
 
 WAT (Web ARChive Timestamp) files contain metadata associated with the crawled web pages (e.g. parsed data from the HTTP response headers, links extracted from HTML pages, server response codes etc.). They are useful for analysis that requires understanding the structure of the web.
 
-Open `whirlwind.warc.wat`: this is the WAT derived from our original WARC. Like the WET file, it's also in WARC format. This file contains a metadata record for each response in the WARC. The metadata is stored as json. You might want to feed this json into a pretty-printer to read it more easily. For example, you can save just the json into a file and use `python -m json.tool FILENAME` to pretty-print it.
+Open `whirlwind.warc.wat`: this is the WAT derived from our original WARC. Like the WET file, it's also in WARC format. It contains two records:
+1) a `warcinfo` record.
+2) a `metadata` record: there should be one for each response in the WARC. The metadata is stored as JSON. 
+
+You might want to feed the JSON into a pretty-printer to read it more easily. For example, you can save just the json into a file and use `python -m json.tool FILENAME` to pretty-print it.
 
 Now that we've looked at the uncompressed versions of these files to understand their structure, we'll be interacting with compressed WARC, WET, and WAT files for the rest of this tour. This is the usual way we manipulate this data with software tools due to the size of the files.
 
