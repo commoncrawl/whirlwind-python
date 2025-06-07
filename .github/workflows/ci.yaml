@@ -20,7 +20,7 @@ jobs:
         EXTRA: [false]  # used to force includes to get included
         include:
           - python-version: '3.7'
-            os: ubuntu-20.04  # oldest version on github actions
+            os: ubuntu-22.04  # oldest version on github actions
             EXTRA: true
           - python-version: '3.11'
             os: macos-latest
@@ -28,7 +28,7 @@ jobs:
           - python-version: '3.13'
             os: macos-latest
             EXTRA: true
-          - python-version: '3.7'
+          - python-version: '3.8'  # duckdb didn't compile for 3.7 and doze 2022 10.0.20348
             os: windows-latest
             EXTRA: true
           - python-version: '3.13'

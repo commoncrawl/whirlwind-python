@@ -5,6 +5,7 @@ import os.path
 import subprocess
 import sys
 import gzip
+import platform
 
 import duckdb
 
@@ -82,6 +83,7 @@ def get_files(algo, crawl):
 
 
 def main(algo, crawl):
+    windows = True if platform.system() == 'Windows' else False
     files = get_files(algo, crawl)
     retries_left = 100
 
@@ -108,7 +110,8 @@ def main(algo, crawl):
     retries_left = 100
     while True:
         try:
-            print(duckdb.sql('SELECT COUNT(*) FROM ccindex;'))
+            # if you print this in windows, it fails: UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-15: character maps to <undefined>
+            res = duckdb.sql('SELECT COUNT(*) FROM ccindex;')
             break
         except duckdb.InvalidInputException as e:
             # duckdb.duckdb.InvalidInputException: Invalid Input Error: No magic bytes found at end of file 'https://...'
@@ -119,6 +122,7 @@ def main(algo, crawl):
                 retries_left -= 1
             else:
                 raise
+    print(res)  # windows workaround
 
     sq2 = f'''
     select
