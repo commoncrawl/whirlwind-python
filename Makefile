@@ -78,7 +78,7 @@ wreck_the_warc:
 	@echo we will break and then fix this warc
 	cp whirlwind.warc.gz testing.warc.gz
 	rm -f testing.warc
-	gunzip testing.warc.gz
+	gzip -d testing.warc.gz  # windows gunzip no work-a
 	@echo
 	@echo iterate over this uncompressed warc: works
 	python ./warcio-iterator.py testing.warc
@@ -90,7 +90,7 @@ wreck_the_warc:
 	python ./warcio-iterator.py testing.warc.gz || /usr/bin/true
 	@echo
 	@echo "now let's do it the right way"
-	gunzip testing.warc.gz
+	gzip -d testing.warc.gz
 	warcio recompress testing.warc testing.warc.gz
 	@echo
 	@echo and now iterating works

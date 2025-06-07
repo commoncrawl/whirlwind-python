@@ -2,9 +2,10 @@ import time
 import glob
 import json
 import os.path
-import subprocess
 import sys
 import gzip
+import platform
+import io
 
 import duckdb
 
@@ -82,6 +83,10 @@ def get_files(algo, crawl):
 
 
 def main(algo, crawl):
+    windows = True if platform.system() == 'Windows' else False
+    if windows:
+        # windows stdout is often cp1252
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
     files = get_files(algo, crawl)
     retries_left = 100
 
