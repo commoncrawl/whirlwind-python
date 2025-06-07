@@ -73,4 +73,5 @@ jobs:
         run: make duck_cloudfront
 
       - name: make wreck_the_warc
+        shell: bash  # or windows will throw an error
         run: make wreck_the_warc
