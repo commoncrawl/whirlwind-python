@@ -20,7 +20,7 @@ Let's get started!
 
 ## Task 0: Set-up
 
-This tutorial was written on Linux and MacOS. We think it should also work on Windows WSL, but raise an issue if you encounter problems.
+This tutorial was written on Linux and MacOS and it should also work on Windows. If you encounter any problems, please raise an issue.
 
 ### Clone the repository and create a local Python environment
 
@@ -168,7 +168,7 @@ We have two versions of the index: the CDX index and the columnar index. The CDX
 
 ### CDX(J) index
 
-The CDX index files are sorted plain-text files, with each line containing information about a single capture in the WARC. Technically, Common Crawl uses CDXJ index files since the information about each capture is formatted as JSON. We'll use CDX and CDXJ interchangeably in this tour for legacy reasons :)
+The CDX index files are sorted plain-text files, with each line containing information about a single capture in the WARC. Technically, Common Crawl uses CDXJ index files since the information about each capture is formatted as JSON. We'll use CDX and CDXJ interchangeably in this tour for legacy reasons 💅
 
 We can create our own CDXJ index from the local WARCs by running:
 
@@ -512,3 +512,19 @@ All of these scripts run the same SQL query and should return the same record (w
 ## Congratulations!
 
 You have completed the Whirlwind Tour of Common Crawl's Datasets using Python! You should now understand different filetypes we have in our corpus and how to interact with Common Crawl's datasets using Python. To see what other people have done with our data, see the  [Examples page](https://commoncrawl.org/examples) on our website. Why not join our Discord through the Community tab?
+
+## Other datasets
+
+We make more datasets available than just the ones discussed in this Whirlwind Tour. Below is a short introduction to some of these other datasets, along with links to where you can find out more.
+
+### Web graph
+
+Common Crawl regularly releases host- and domain-level graphs for visualising the crawl data. The web graphs are available to download [here](https://commoncrawl.org/web-graphs). We provide a [repository](https://github.com/commoncrawl/cc-webgraph) with tools to construct, process, and explore the web graphs. 
+
+### Host index
+
+The host index is a database which has one row for every web host we know about in each individual crawl. It contains summary information from the crawl, indices, the web graph, and our raw crawler logs. More information is available [here](https://commoncrawl.org/blog/introducing-the-host-index). We also provide a [repository](https://github.com/commoncrawl/cc-host-index) containing examples on how to use the host index. 
+
+### Index annotations
+
+Index annotations allow users to create a database table that can be joined to Common Crawl's columnar url index or host index. This is useful because we can enrich our datasets with extra information and then use it for analysis. We have a [repository](https://github.com/commoncrawl/cc-index-annotations) with example code for joining annotations to the columnar url index or host index.
