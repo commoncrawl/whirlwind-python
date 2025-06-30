@@ -58,9 +58,7 @@ If we click on `CC-MAIN-2024-22' in the dropdown, we are taken to a page listing
 
 ![crawl_file_listing.png](img/crawl_file_listing.png)
 
-In this whirlwind tour, we're going to look first at the WARC, WET, and WAT files: the data types which store the crawl data. Later, we will look at the two index files and how these help us access the crawl data we want. 
-
-(We also have a [web graph](https://commoncrawl.org/web-graphs) by host and domains, but it is not currently demonstrated in this tour.)
+In this whirlwind tour, we're going to look at the WARC, WET, and WAT files: the data types which store the crawl data. Later, we will look at the two index files and how these help us access the crawl data we want. At the [end of the Tour](#other-datasets), we'll mention some of Common Crawl's other datasets and where you can find more information about them.
 
 ### WARC
 
@@ -517,9 +515,50 @@ You have completed the Whirlwind Tour of Common Crawl's Datasets using Python! Y
 
 We make more datasets available than just the ones discussed in this Whirlwind Tour. Below is a short introduction to some of these other datasets, along with links to where you can find out more.
 
-### Web graph
+### Web Graphs
 
-Common Crawl regularly releases host- and domain-level graphs for visualising the crawl data. The web graphs are available to download [here](https://commoncrawl.org/web-graphs). We provide a [repository](https://github.com/commoncrawl/cc-webgraph) with tools to construct, process, and explore the web graphs. 
+Common Crawl regularly releases Web Graphs which are graphs describing the structure and connectivity of the web as captured in the crawl releases. We provide two levels of graph: host-level and domain-level. Both are available to download [from our website](https://commoncrawl.org/web-graphs). 
+
+The host-level graph describes links between pages on the web at the level of hostnames (e.g. `en.wikipedia.org`). The domain-level graph aggregates this information in the host-level graph, describing links at the pay-level domain (PLD) level (based on the public suffix list maintained on [publicsuffix.org](publicsuffix.org)). The PLD is the subdomain directly under the top-level domain (TLD): e.g. for `en.wikipedia.org`, the TLD would be `.org` and the PLD would be `wikipedia.org`.
+
+As an example, let's look at the [Web Graph release for March, April and May 2025](https://data.commoncrawl.org/projects/hyperlinkgraph/cc-main-2025-mar-apr-may/index.html). This page provides links to download data associated with the host- and domain-level graph for those months. The key files needed to construct the graphs are the files containing the vertices or nodes (the hosts or domains), and the files containing the edges (the links between the hosts/domains). These are currently the top two links in each of the tables. 
+
+![web-graph.png](img/web-graph.png)
+
+The `.txt` files for nodes and edges are actually tab-separated files. The "Description" column in the table explains what data is in the columns. If we download the domain-level graph vertices, 
+[cc-main-2025-mar-apr-may-domain-vertices.txt](https://data.commoncrawl.org/projects/hyperlinkgraph/cc-main-2025-mar-apr-may/domain/cc-main-2025-mar-apr-may-domain-vertices.txt.gz), we find that the top of the file looks like this:
+
+```tsv
+0	aaa.1111	1
+1	aaa.11111	1
+2	aaa.2	1
+3	aaa.a	1
+4	aaa.aa	1
+5	aaa.aaa	3
+6	aaa.aaaa	1
+7	aaa.aaaaaa	1
+8	aaa.aaaaaaa	1
+9	aaa.aaaaaaaaa	1
+```
+The first column gives the node ID, the second gives the (pay-level) domain name (as provided by reverse DNS), and the third column gives the number of hosts in the domain.
+
+We can also look at the top of the domain-level edges/vertices [cc-main-2025-mar-apr-may-domain-edges.txt](https://data.commoncrawl.org/projects/hyperlinkgraph/cc-main-2025-mar-apr-may/domain/cc-main-2025-mar-apr-may-domain-edges.txt.gz):
+
+```tsv
+39	126790965
+41	53700629
+41	126790965
+42	126790965
+48	22113090
+48	91547783
+48	110426784
+48	119774627
+48	121059062
+49	22113090
+```
+Here, each row defines a link between two domains, with the first column giving the ID of the originating nodes, and the second column giving the ID of the destination node. The files of nodes and edges for the host-level graph are similar to those for the domain graph, with the only difference being that there is no column for number of hosts in a domain.
+
+If you're interested in working more with the Web Graphs, we provide a [repository](https://github.com/commoncrawl/cc-webgraph) with tools to construct, process, and explore the Web Graphs. We also have a [notebook](https://github.com/commoncrawl/cc-notebooks/tree/main/cc-webgraph-statistics) which shows users how to view statistics about the Common Crawl Web Graph data sets and interactively explore the graphs.
 
 ### Host index
 
