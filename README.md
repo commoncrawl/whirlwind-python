@@ -110,8 +110,8 @@ Now that we've looked at the uncompressed versions of these files to understand 
 The [warcio](https://github.com/webrecorder/warcio) Python library lets us read and write WARC files programmatically.
 ```mermaid
 flowchart LR
-    user["user (r/w)"]--warcio (r) -->warc
-    user--warcio (w) -->warc
+    user["userprocess (r/w)"]--warcio (w) -->warc
+    warc --warcio (r)--> user 
     warc@{shape: cyl}
 ```
 Let's use it to iterate over our WARC, WET, and WAT files and print out the record types we looked at before. First, look at the code in `warcio-iterator.py`:
@@ -177,11 +177,13 @@ The output has three sections, one each for the WARC, WET, and WAT. For each one
 
 ## Task 3: Index the WARC, WET, and WAT
 
-The example WARC files we've been using are tiny and easy to work with. The real WARC files are around a gigabyte in size and contain about 30,000 webpages each. What's more, we have around 24 million of these files! To read all of them, we could iterate, but what if we wanted random access so we could read just one particular record? We do that with an index. 
+The example WARC files we've been using a\e tiny and easy to work with. The real WARC files are around a gigabyte in size and contain about 30,000 webpages each. What's more, we have around 24 million of these files! To read all of them, we could iterate, but what if we wanted random access so we could read just one particular record? We do that with an index. 
 ```mermaid
 flowchart LR
-    warc[warc] --> indexer --> cdxj[.cdxj] & columnar[.parquet]
+    warc --> indexer --> cdxj & columnar
     warc@{shape: cyl}
+    cdxj@{ shape: stored-data}
+    columnar@{ shape: stored-data}
 ```
 
 
@@ -335,12 +337,6 @@ Make sure you compress WARCs the right way!
 ## Task 6: Use cdx_toolkit to query the full CDX index and download those captures from AWS S3
 
 Some of our users only want to download a small subset of the crawl. They want to run queries against an index, either the CDX index we just talked about, or in the columnar index, which we'll talk about later.
-```mermaid
-flowchart LR
-    user --cdx_toolkit--> cdxi
-    cdxi@{shape: cyl}
-```
-
 
 The [cdx_toolkit](https://github.com/cocrawler/cdx_toolkit) is a set of tools for working with CDX indices of web crawls and archives. It knows how to query the CDX index across all of our crawls and also can create WARCs of just the records you want. We will fetch the same record from Wikipedia that we've been using for the whirlwind tour.
 
