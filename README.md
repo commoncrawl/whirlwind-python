@@ -536,9 +536,17 @@ download instructions.
 
 All of these scripts run the same SQL query and should return the same record (written as a parquet file).
 
+## Bonus 2: combine some steps
+
+1. Use the DuckDb techniques from [Task 8](#task-8-query-using-the-columnar-index--duckdb-from-outside-aws) and the [Index Server](https://index.commoncrawl.org) to find a new webpage in the archives. 
+2. Note its url, warc, and timestamp. 
+3. Now open up the Makefile from [Task 6](#task-6-use-cdx_toolkit-to-query-the-full-cdx-index-and-download-those-captures-from-aws-s3) and look at the actions from the cdx_toolkit section.
+4. Repeat the cdx_toolkit steps, but for the page and date range you found above.
+
 ## Congratulations!
 
 You have completed the Whirlwind Tour of Common Crawl's Datasets using Python! You should now understand different filetypes we have in our corpus and how to interact with Common Crawl's datasets using Python. To see what other people have done with our data, see the  [Examples page](https://commoncrawl.org/examples) on our website. Why not join our Discord through the Community tab?
+
 
 ## Other datasets
 
