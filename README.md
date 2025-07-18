@@ -1,6 +1,18 @@
 # Whirlwind Tour of Common Crawl's Datasets using Python
 
 The Common Crawl corpus contains petabytes of crawl data, including raw web page data, metadata extracts, and text extracts. Common Crawl's data storage is a little complicated, as you might expect for such a large and rich dataset. We make our crawl data available in a variety of formats (WARC, WET, WAT) and we also have two index files of the crawled webpages: CDXJ and columnar.
+```mermaid
+flowchart TD
+    WEB["WEB"] -- crawler --> cc["Common Crawl"]
+    cc --> WARC["WARC"] & WAT["WAT"] & WET["WET"] & CDXJ["CDXJ"] & Columnar["Columnar"] & etc["..."]
+    WEB@{ shape: cyl}
+    WARC@{ shape: stored-data}
+    WAT@{ shape: stored-data}
+    WET@{ shape: stored-data}
+    CDXJ@{ shape: stored-data}
+    Columnar@{ shape: stored-data}
+    etc@{ shape: stored-data}
+```
 
 The goal of this whirlwind tour is to show you how a single webpage appears in all of these different places. That webpage is [https://an.wikipedia.org/wiki/Escopete](https://an.wikipedia.org/wiki/Escopete), which we crawled on the date 2024-05-18T01:58:10Z. On the way, we'll also explore the file formats we use and learn about some useful tools for interacting with our data!
 
@@ -96,7 +108,12 @@ Now that we've looked at the uncompressed versions of these files to understand 
 ## Task 2: Iterate over WARC, WET, and WAT files
 
 The [warcio](https://github.com/webrecorder/warcio) Python library lets us read and write WARC files programmatically.
-
+```mermaid
+flowchart LR
+    user["user (r/w)"]--warcio (r) -->warc
+    user--warcio (w) -->warc
+    warc@{shape: cyl}
+```
 Let's use it to iterate over our WARC, WET, and WAT files and print out the record types we looked at before. First, look at the code in `warcio-iterator.py`:
 
 <details>
@@ -161,6 +178,12 @@ The output has three sections, one each for the WARC, WET, and WAT. For each one
 ## Task 3: Index the WARC, WET, and WAT
 
 The example WARC files we've been using are tiny and easy to work with. The real WARC files are around a gigabyte in size and contain about 30,000 webpages each. What's more, we have around 24 million of these files! To read all of them, we could iterate, but what if we wanted random access so we could read just one particular record? We do that with an index. 
+```mermaid
+flowchart LR
+    warc[warc] --> indexer --> cdxj[.cdxj] & columnar[.parquet]
+    warc@{shape: cyl}
+```
+
 
 We have two versions of the index: the CDX index and the columnar index. The CDX index is useful for looking up single pages, whereas the columnar index is better suited to analytical and bulk queries. We'll look at both in this tour, starting with the CDX index.
 
@@ -196,7 +219,7 @@ The JSON blob has enough information to extract individual records: it says whic
 
 ## Task 4: Use the CDXJ index to extract raw content from the local WARC, WET, and WAT 
 
-Normally, compressed files aren't random access. However, the WARC files use a trick to make this possible, which is that every record needs to be separately compressed.The `gzip` compression utility supports this, but it's rarely used.
+Normally, compressed files aren't random access. However, the WARC files use a trick to make this possible, which is that every record needs to be separately compressed. The `gzip` compression utility supports this, but it's rarely used.
 
 To extract one record from a warc file, all you need to know is the filename and the offset into the file. If you're reading over the web, then it really helps to know the exact length of the record.
 
@@ -312,6 +335,12 @@ Make sure you compress WARCs the right way!
 ## Task 6: Use cdx_toolkit to query the full CDX index and download those captures from AWS S3
 
 Some of our users only want to download a small subset of the crawl. They want to run queries against an index, either the CDX index we just talked about, or in the columnar index, which we'll talk about later.
+```mermaid
+flowchart LR
+    user --cdx_toolkit--> cdxi
+    cdxi@{shape: cyl}
+```
+
 
 The [cdx_toolkit](https://github.com/cocrawler/cdx_toolkit) is a set of tools for working with CDX indices of web crawls and archives. It knows how to query the CDX index across all of our crawls and also can create WARCs of just the records you want. We will fetch the same record from Wikipedia that we've been using for the whirlwind tour.
 
