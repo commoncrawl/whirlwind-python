@@ -177,7 +177,7 @@ The output has three sections, one each for the WARC, WET, and WAT. For each one
 
 ## Task 3: Index the WARC, WET, and WAT
 
-The example WARC files we've been using a\e tiny and easy to work with. The real WARC files are around a gigabyte in size and contain about 30,000 webpages each. What's more, we have around 24 million of these files! To read all of them, we could iterate, but what if we wanted random access so we could read just one particular record? We do that with an index. 
+The example WARC files we've been using are tiny and easy to work with. The real WARC files are around a gigabyte in size and contain about 30,000 webpages each. What's more, we have around 24 million of these files! To read all of them, we could iterate, but what if we wanted random access so we could read just one particular record? We do that with an index. 
 ```mermaid
 flowchart LR
     warc --> indexer --> cdxj & columnar
