@@ -1,6 +1,18 @@
 # Whirlwind Tour of Common Crawl's Datasets using Python
 
 The Common Crawl corpus contains petabytes of crawl data, including raw web page data, metadata extracts, and text extracts. Common Crawl's data storage is a little complicated, as you might expect for such a large and rich dataset. We make our crawl data available in a variety of formats (WARC, WET, WAT) and we also have two index files of the crawled webpages: CDXJ and columnar.
+```mermaid
+flowchart TD
+    WEB["WEB"] -- crawler --> cc["Common Crawl"]
+    cc --> WARC["WARC"] & WAT["WAT"] & WET["WET"] & CDXJ["CDXJ"] & Columnar["Columnar"] & etc["..."]
+    WEB@{ shape: cyl}
+    WARC@{ shape: stored-data}
+    WAT@{ shape: stored-data}
+    WET@{ shape: stored-data}
+    CDXJ@{ shape: stored-data}
+    Columnar@{ shape: stored-data}
+    etc@{ shape: stored-data}
+```
 
 The goal of this whirlwind tour is to show you how a single webpage appears in all of these different places. That webpage is [https://an.wikipedia.org/wiki/Escopete](https://an.wikipedia.org/wiki/Escopete), which we crawled on the date 2024-05-18T01:58:10Z. On the way, we'll also explore the file formats we use and learn about some useful tools for interacting with our data!
 
@@ -96,7 +108,12 @@ Now that we've looked at the uncompressed versions of these files to understand 
 ## Task 2: Iterate over WARC, WET, and WAT files
 
 The [warcio](https://github.com/webrecorder/warcio) Python library lets us read and write WARC files programmatically.
-
+```mermaid
+flowchart LR
+    user["userprocess (r/w)"]--warcio (w) -->warc
+    warc --warcio (r)--> user 
+    warc@{shape: cyl}
+```
 Let's use it to iterate over our WARC, WET, and WAT files and print out the record types we looked at before. First, look at the code in `warcio-iterator.py`:
 
 <details>
@@ -161,6 +178,14 @@ The output has three sections, one each for the WARC, WET, and WAT. For each one
 ## Task 3: Index the WARC, WET, and WAT
 
 The example WARC files we've been using are tiny and easy to work with. The real WARC files are around a gigabyte in size and contain about 30,000 webpages each. What's more, we have around 24 million of these files! To read all of them, we could iterate, but what if we wanted random access so we could read just one particular record? We do that with an index. 
+```mermaid
+flowchart LR
+    warc --> indexer --> cdxj & columnar
+    warc@{shape: cyl}
+    cdxj@{ shape: stored-data}
+    columnar@{ shape: stored-data}
+```
+
 
 We have two versions of the index: the CDX index and the columnar index. The CDX index is useful for looking up single pages, whereas the columnar index is better suited to analytical and bulk queries. We'll look at both in this tour, starting with the CDX index.
 
@@ -196,7 +221,7 @@ The JSON blob has enough information to extract individual records: it says whic
 
 ## Task 4: Use the CDXJ index to extract raw content from the local WARC, WET, and WAT 
 
-Normally, compressed files aren't random access. However, the WARC files use a trick to make this possible, which is that every record needs to be separately compressed.The `gzip` compression utility supports this, but it's rarely used.
+Normally, compressed files aren't random access. However, the WARC files use a trick to make this possible, which is that every record needs to be separately compressed. The `gzip` compression utility supports this, but it's rarely used.
 
 To extract one record from a warc file, all you need to know is the filename and the offset into the file. If you're reading over the web, then it really helps to know the exact length of the record.
 
@@ -507,9 +532,17 @@ download instructions.
 
 All of these scripts run the same SQL query and should return the same record (written as a parquet file).
 
+## Bonus 2: combine some steps
+
+1. Use the DuckDb techniques from [Task 8](#task-8-query-using-the-columnar-index--duckdb-from-outside-aws) and the [Index Server](https://index.commoncrawl.org) to find a new webpage in the archives. 
+2. Note its url, warc, and timestamp. 
+3. Now open up the Makefile from [Task 6](#task-6-use-cdx_toolkit-to-query-the-full-cdx-index-and-download-those-captures-from-aws-s3) and look at the actions from the cdx_toolkit section.
+4. Repeat the cdx_toolkit steps, but for the page and date range you found above.
+
 ## Congratulations!
 
 You have completed the Whirlwind Tour of Common Crawl's Datasets using Python! You should now understand different filetypes we have in our corpus and how to interact with Common Crawl's datasets using Python. To see what other people have done with our data, see the  [Examples page](https://commoncrawl.org/examples) on our website. Why not join our Discord through the Community tab?
+
 
 ## Other datasets
 
