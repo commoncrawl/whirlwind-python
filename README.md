@@ -350,8 +350,8 @@ The output looks like this:
   <summary>Click to view output</summary>
 
 ```
-look up this capture in the comoncrawl cdx index
-cdxt --cc --from 20240518015810 --to 20240518015810 iter an.wikipedia.org/wiki/Escopete
+look up this capture in the comoncrawl cdx index for CC-MAIN-2024-22, returning only the first match:
+cdxt --limit 1 --crawl CC-MAIN-2024-22 --from 20240518015810 --to 20240518015810 iter an.wikipedia.org/wiki/Escopete
 status 200, timestamp 20240518015810, url https://an.wikipedia.org/wiki/Escopete
 
 extract the content from the commoncrawl s3 bucket
