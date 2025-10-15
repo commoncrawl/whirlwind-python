@@ -350,18 +350,19 @@ The output looks like this:
   <summary>Click to view output</summary>
 
 ```
-look up this capture in the comoncrawl cdx index for CC-MAIN-2024-22, returning only the first match:
-cdxt --limit 1 --crawl CC-MAIN-2024-22 --from 20240518015810 --to 20240518015810 iter an.wikipedia.org/wiki/Escopete
+look up this capture in the comoncrawl cdx index for CC-MAIN-2024-22, returning only the first match
+cdxt --limit 1 --crawl CC-MAIN-2024-22 iter an.wikipedia.org/wiki/Escopete
 status 200, timestamp 20240518015810, url https://an.wikipedia.org/wiki/Escopete
 
-extract the content from the commoncrawl s3 bucket
+cleanup previous work
 rm -f TEST-000000.extracted.warc.gz
-cdxt --cc --from 20240518015810 --to 20240518015810 warc an.wikipedia.org/wiki/Escopete
+extract the content from the commoncrawl s3 bucket, using the timestamp from above
+cdxt --limit 1 --crawl CC-MAIN-2024-22 --from 20240518015810 --to 20240518015810 warc an.wikipedia.org/wiki/Escopete
 
 index this new warc
 cdxj-indexer TEST-000000.extracted.warc.gz  > TEST-000000.extracted.warc.cdxj
 cat TEST-000000.extracted.warc.cdxj
-org,wikipedia,an)/wiki/escopete 20240518015810 {"url": "https://an.wikipedia.org/wiki/Escopete", "mime": "text/html", "status": "200", "digest": "sha1:RY7PLBUFQNI2FFV5FTUQK72W6SNPXLQU", "length": "17455", "offset": "379", "filename": "TEST-000000.extracted.warc.gz"}
+org,wikipedia,an)/wiki/escopete 20240518015810 {"url": "https://an.wikipedia.org/wiki/Escopete", "mime": "text/html", "status": "200", "digest": "sha1:RY7PLBUFQNI2FFV5FTUQK72W6SNPXLQU", "length": "17455", "offset": "406", "filename": "TEST-000000.extracted.warc.gz"}
 
 iterate this new warc
 python ./warcio-iterator.py TEST-000000.extracted.warc.gz
