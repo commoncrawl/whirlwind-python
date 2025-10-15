@@ -1,6 +1,6 @@
 # Whirlwind Tour of Common Crawl's Datasets using Python
 
-The Common Crawl corpus contains petabytes of crawl data, including raw web page data, metadata extracts, and text extracts. Common Crawl's data storage is a little complicated, as you might expect for such a large and rich dataset. We make our crawl data available in a variety of formats (WARC, WET, WAT) and we also have two index files of the crawled webpages: CDXJ and columnar.
+The Common Crawl corpus contains petabytes of crawl data, including raw web page data, metadata, and parsed text. Common Crawl's data storage is a little complicated, as you might expect for such a large and rich dataset. We make our crawl data available in a variety of formats (WARC, WET, WAT) and we also have two index files of the crawled webpages: CDXJ and columnar.
 ```mermaid
 flowchart TD
     WEB["WEB"] -- crawler --> cc["Common Crawl"]
@@ -350,14 +350,14 @@ The output looks like this:
   <summary>Click to view output</summary>
 
 ```
-look up this capture in the comoncrawl cdx index for CC-MAIN-2024-22, returning only the first match
+lookup captures for the given url in the comoncrawl cdx index for CC-MAIN-2024-22, returning only the first match
 cdxt --limit 1 --crawl CC-MAIN-2024-22 iter an.wikipedia.org/wiki/Escopete
 status 200, timestamp 20240518015810, url https://an.wikipedia.org/wiki/Escopete
 
 cleanup previous work
 rm -f TEST-000000.extracted.warc.gz
-extract the content from the commoncrawl s3 bucket, using the timestamp from above
-cdxt --limit 1 --crawl CC-MAIN-2024-22 --from 20240518015810 --to 20240518015810 warc an.wikipedia.org/wiki/Escopete
+retrieve the content from the commoncrawl s3 bucket
+cdxt --limit 1 --crawl CC-MAIN-2024-22 warc an.wikipedia.org/wiki/Escopete
 
 index this new warc
 cdxj-indexer TEST-000000.extracted.warc.gz  > TEST-000000.extracted.warc.cdxj
@@ -373,9 +373,23 @@ $ python ./warcio-iterator.py TEST-000000.extracted.warc.gz
 
 </details>
 
-We look up the capture using the `cdxt` commands by specifying the exact URL (`an.wikipedia.org/wiki/Escopete`) and the date of its capture (20240518015810). The output is the WARC file `TEST-000000.extracted.warc.gz` which contains a `warcinfo` record explaining what the WARC is, followed by the `response` record we requested. The Makefile target then runs `cdxj-indexer` on this new WARC to make a CDXJ index of it as in Task 3, and finally iterates over the WARC using `warcio-iterator.py` as in Task 2.
+There's a lot going on here so let's unpack it a little.
 
-If you dig into cdx_toolkit's code, you'll find that it is using the offset and length of the WARC record, as returned by the CDX index query, to make a HTTP byte range request to S3 to download the single WARC record we want. It only downloads the response WARC record because our CDX index only has the response records indexed.
+#### Check that the crawl has a record for the page we are interested in
+
+We check for capture results using the `cdxt` command `iter`, specifying the exact URL `an.wikipedia.org/wiki/Escopete` and the crawl identifier `CC-MAIN-2024-22`. The result of this tells us that the crawl successfuly fetched this page at timestamp `20240518015810`.
+* You can try removing the `--limit 1` flag and/or replacing `--crawl CC-MAIN-2024-22` with `--cc`, which will return more results reflecting more times when this URL was crawled. 
+* You can also use `--from <timestamp>` and `--to <timestamp>` to restrict the time range. This can even be used to pinpoint an exact record. For example, `--from 20240518015810 --to 20240518015810` will only ever return the record that we've been looking at elsewhere in the whirlwind tour.
+
+#### Retrieve the fetched content as WARC
+
+Next, we use the `cdxt` command `warc` to retrieve the content and save it locally as a new WARC file, again specifying the exact URL and crawl identifier. This creates the WARC file `TEST-000000.extracted.warc.gz` which contains a `warcinfo` record explaining what the WARC is, followed by the `response` record we requested. 
+* If you dig into cdx_toolkit's code, you'll find that it is using the offset and length of the WARC record (as returned by the CDX index query) to make a HTTP byte range request to S3 that isolates and returns just the single record we want from the full file. It only downloads the response WARC record because our CDX index only has the response records indexed.
+* By default `cdxt` avoids overwriting existing files by automatically incrementing the counter in the filename. If you run this again without deleting `TEST-000000.extracted.warc.gz`, the data will be written again to a new file `TEST-000001.extracted.warc.gz`.
+
+### Indexing the WARC and viewing its contents
+
+Next, we run `cdxj-indexer` on this new WARC to make a CDXJ index of it as in Task 3, and finally iterates over the WARC using `warcio-iterator.py` as in Task 2.
 
 ## Task 7: Find the right part of the columnar index 
 

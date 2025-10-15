@@ -41,8 +41,8 @@ cdx_toolkit:
 	@echo
 	@echo cleanup previous work
 	rm -f TEST-000000.extracted.warc.gz
-	@echo extract the content from the commoncrawl s3 bucket, using the timestamp from above
-	cdxt --limit 1 --crawl CC-MAIN-2024-22 --from 20240518015810 --to 20240518015810 warc an.wikipedia.org/wiki/Escopete
+	@echo retrieve the content from the commoncrawl s3 bucket
+	cdxt --limit 1 --crawl CC-MAIN-2024-22 warc an.wikipedia.org/wiki/Escopete
 	@echo
 	@echo index this new warc
 	cdxj-indexer TEST-000000.extracted.warc.gz  > TEST-000000.extracted.warc.cdxj
