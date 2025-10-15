@@ -379,14 +379,15 @@ There's a lot going on here so let's unpack it a little.
 
 We check for capture results using the `cdxt` command `iter`, specifying the exact URL `an.wikipedia.org/wiki/Escopete` and the crawl identifier `CC-MAIN-2024-22`. The result of this tells us that the crawl successfuly fetched this page at timestamp `20240518015810`.
 * You can try removing the `--limit 1` flag and/or replacing `--crawl CC-MAIN-2024-22` with `--cc`, which will return more results reflecting more times when this URL was crawled. 
-* You can also use `--from <timestamp>` and `--to <timestamp>` to restrict the time range. This can even be used to pinpoint an exact record. For example, `--from 20240518015810 --to 20240518015810` will only ever return the record that we've been looking at elsewhere in the whirlwind tour.
-* URLs may be specified with wildcards to return even more results - `"an.wikipedia.org/wiki/Escop*"` matches `an.wikipedia.org/wiki/Escopulión` and `an.wikipedia.org/wiki/Escopete`.
+* You can also use `--from <timestamp>` and `--to <timestamp>` to restrict the time range when the URL was crawled. This can even be used to pinpoint an exact record — for example, `--from 20240518015810 --to 20240518015810` will only ever return the record that we've been looking at elsewhere in this tutorial.
+* URLs may be specified with wildcards to return even more results: `"an.wikipedia.org/wiki/Escop*"` matches `an.wikipedia.org/wiki/Escopulión` and `an.wikipedia.org/wiki/Escopete`.
 
 #### Retrieve the fetched content as WARC
 
 Next, we use the `cdxt` command `warc` to retrieve the content and save it locally as a new WARC file, again specifying the exact URL and crawl identifier. This creates the WARC file `TEST-000000.extracted.warc.gz` which contains a `warcinfo` record explaining what the WARC is, followed by the `response` record we requested. 
 * If you dig into cdx_toolkit's code, you'll find that it is using the offset and length of the WARC record (as returned by the CDX index query) to make a HTTP byte range request to S3 that isolates and returns just the single record we want from the full file. It only downloads the response WARC record because our CDX index only has the response records indexed.
 * By default `cdxt` avoids overwriting existing files by automatically incrementing the counter in the filename. If you run this again without deleting `TEST-000000.extracted.warc.gz`, the data will be written again to a new file `TEST-000001.extracted.warc.gz`.
+* Limit, timestamp, and crawl index args, as well as URL wildcards, work as for `iter`.
 
 ### Indexing the WARC and viewing its contents
 
