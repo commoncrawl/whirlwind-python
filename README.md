@@ -380,6 +380,7 @@ There's a lot going on here so let's unpack it a little.
 We check for capture results using the `cdxt` command `iter`, specifying the exact URL `an.wikipedia.org/wiki/Escopete` and the crawl identifier `CC-MAIN-2024-22`. The result of this tells us that the crawl successfuly fetched this page at timestamp `20240518015810`.
 * You can try removing the `--limit 1` flag and/or replacing `--crawl CC-MAIN-2024-22` with `--cc`, which will return more results reflecting more times when this URL was crawled. 
 * You can also use `--from <timestamp>` and `--to <timestamp>` to restrict the time range. This can even be used to pinpoint an exact record. For example, `--from 20240518015810 --to 20240518015810` will only ever return the record that we've been looking at elsewhere in the whirlwind tour.
+* URLs may be specified with wildcards to return even more results - `"an.wikipedia.org/wiki/Escop*"` matches `an.wikipedia.org/wiki/Escopulión` and `an.wikipedia.org/wiki/Escopete`.
 
 #### Retrieve the fetched content as WARC
 
