@@ -36,7 +36,7 @@ extract:
 	@echo "hint: python -m json.tool extraction.json"
 
 cdx_toolkit:
-	@echo look up this capture in the comoncrawl cdx index for CC-MAIN-2024-22, returning only the first match
+	@echo look up this capture in the commoncrawl cdx index for CC-MAIN-2024-22, returning only the first match
 	cdxt --limit 1 --crawl CC-MAIN-2024-22 iter an.wikipedia.org/wiki/Escopete
 	@echo
 	@echo cleanup previous work
