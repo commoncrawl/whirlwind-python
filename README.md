@@ -391,7 +391,7 @@ Next, we use the `cdxt` command `warc` to retrieve the content and save it local
 
 ### Indexing the WARC and viewing its contents
 
-Next, we run `cdxj-indexer` on this new WARC to make a CDXJ index of it as in Task 3, and finally iterates over the WARC using `warcio-iterator.py` as in Task 2.
+Finally, we run `cdxj-indexer` on this new WARC to make a CDXJ index of it as in Task 3, and then iterate over the WARC using `warcio-iterator.py` as in Task 2.
 
 ## Task 7: Find the right part of the columnar index 
 
