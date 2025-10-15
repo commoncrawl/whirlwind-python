@@ -87,15 +87,15 @@ You'll see four records total, with the start of each record marked with the hea
 
 ### WET
 
-WET (WARC Encapsulated Text) files only contain the body text of web pages extracted from the HTML and exclude any HTML code, images, or other media. This makes them useful for text analysis and natural language processing (NLP) tasks.
+WET (WARC Encapsulated Text) files only contain the body text of web pages parsed from the HTML and exclude any HTML code, images, or other media. This makes them useful for text analysis and natural language processing (NLP) tasks.
 
 Open `whirlwind.warc.wet`: this is the WET derived from our original WARC. We can see that it's still in WARC format with two records: 
 1) a `warcinfo` record.
-2) a `conversion` record: the extracted text with the HTTP headers removed.
+2) a `conversion` record: the parsed text with HTTP headers removed.
 
 ### WAT
 
-WAT (Web ARChive Timestamp) files contain metadata associated with the crawled web pages (e.g. parsed data from the HTTP response headers, links extracted from HTML pages, server response codes etc.). They are useful for analysis that requires understanding the structure of the web.
+WAT (Web ARChive Timestamp) files contain metadata associated with the crawled web pages (e.g. parsed data from the HTTP response headers, links recovered from HTML pages, server response codes etc.). They are useful for analysis that requires understanding the structure of the web.
 
 Open `whirlwind.warc.wat`: this is the WAT derived from our original WARC. Like the WET file, it's also in WARC format. It contains two records:
 1) a `warcinfo` record.
@@ -217,9 +217,9 @@ For each of these records, there's one text line in the index - yes, it's a flat
 
 What is the purpose of this funky format? It's done this way because these flat files (300 gigabytes total per crawl) can be sorted on the primary key using any out-of-core sort utility e.g. the standard Linux `sort`, or one of the Hadoop-based out-of-core sort functions.
 
-The JSON blob has enough information to extract individual records: it says which warc file the record is in, and the offset and length of the record. We'll use that in the next section.
+The JSON blob has enough information to cleanly isolate the raw data of a single record: it defines which WARC file the record is in, and the byte offset and length of the record within this file. We'll use that in the next section.
 
-## Task 4: Use the CDXJ index to extract raw content from the local WARC, WET, and WAT 
+## Task 4: Use the CDXJ index to extract a subset of raw content from the local WARC, WET, and WAT 
 
 Normally, compressed files aren't random access. However, the WARC files use a trick to make this possible, which is that every record needs to be separately compressed. The `gzip` compression utility supports this, but it's rarely used.
 
@@ -350,21 +350,23 @@ The output looks like this:
   <summary>Click to view output</summary>
 
 ```
-look up this capture in the comoncrawl cdx index for CC-MAIN-2024-22, returning only the first match:
-cdxt --limit 1 --crawl CC-MAIN-2024-22 --from 20240518015810 --to 20240518015810 iter an.wikipedia.org/wiki/Escopete
+look up this capture in the comoncrawl cdx index for CC-MAIN-2024-22, returning only the first match
+$ cdxt --limit 1 --crawl CC-MAIN-2024-22 iter an.wikipedia.org/wiki/Escopete
 status 200, timestamp 20240518015810, url https://an.wikipedia.org/wiki/Escopete
 
-extract the content from the commoncrawl s3 bucket
-rm -f TEST-000000.extracted.warc.gz
-cdxt --cc --from 20240518015810 --to 20240518015810 warc an.wikipedia.org/wiki/Escopete
+cleanup previous work, if any
+$ rm -f TEST-000000.extracted.warc.gz
+retrieve the content from the commoncrawl s3 bucket, restricting to the timestamp we were given above
+$ cdxt --cc --from 20240518015810 --to 20240518015810 warc an.wikipedia.org/wiki/Escopete
+data is written to TEST-<n>.extracted.warc.gz where <n> starts at 000000 and counts upward if a file already exists at 000000
 
 index this new warc
-cdxj-indexer TEST-000000.extracted.warc.gz  > TEST-000000.extracted.warc.cdxj
-cat TEST-000000.extracted.warc.cdxj
+$ cdxj-indexer TEST-000000.extracted.warc.gz  > TEST-000000.extracted.warc.cdxj
+$ cat TEST-000000.extracted.warc.cdxj
 org,wikipedia,an)/wiki/escopete 20240518015810 {"url": "https://an.wikipedia.org/wiki/Escopete", "mime": "text/html", "status": "200", "digest": "sha1:RY7PLBUFQNI2FFV5FTUQK72W6SNPXLQU", "length": "17455", "offset": "379", "filename": "TEST-000000.extracted.warc.gz"}
 
 iterate this new warc
-python ./warcio-iterator.py TEST-000000.extracted.warc.gz
+$ python ./warcio-iterator.py TEST-000000.extracted.warc.gz
   WARC-Type: warcinfo
   WARC-Type: response
     WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
