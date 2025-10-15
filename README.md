@@ -365,7 +365,7 @@ cat TEST-000000.extracted.warc.cdxj
 org,wikipedia,an)/wiki/escopete 20240518015810 {"url": "https://an.wikipedia.org/wiki/Escopete", "mime": "text/html", "status": "200", "digest": "sha1:RY7PLBUFQNI2FFV5FTUQK72W6SNPXLQU", "length": "17455", "offset": "406", "filename": "TEST-000000.extracted.warc.gz"}
 
 iterate this new warc
-$ python ./warcio-iterator.py TEST-000000.extracted.warc.gz
+python ./warcio-iterator.py TEST-000000.extracted.warc.gz
   WARC-Type: warcinfo
   WARC-Type: response
     WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
