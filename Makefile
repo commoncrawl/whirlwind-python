@@ -36,12 +36,12 @@ extract:
 	@echo "hint: python -m json.tool extraction.json"
 
 cdx_toolkit:
-	@echo look up this capture in the comoncrawl cdx index
-	#cdxt --cc --from 20240518015810 --to 20240518015810 iter an.wikipedia.org/wiki/Escopete
-	cdxt --limit 1 --crawl CC-MAIN-2024-22 --from 20240518015810 --to 20240518015810 iter an.wikipedia.org/wiki/Escopete
+	@echo look up this capture in the comoncrawl cdx index for CC-MAIN-2024-22, returning only the first match
+	cdxt --limit 1 --crawl CC-MAIN-2024-22 iter an.wikipedia.org/wiki/Escopete
 	@echo
-	@echo extract the content from the commoncrawl s3 bucket
+	@echo cleanup previous work
 	rm -f TEST-000000.extracted.warc.gz
+	@echo extract the content from the commoncrawl s3 bucket, using the timestamp from above
 	cdxt --limit 1 --crawl CC-MAIN-2024-22 --from 20240518015810 --to 20240518015810 warc an.wikipedia.org/wiki/Escopete
 	@echo
 	@echo index this new warc
