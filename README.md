@@ -389,9 +389,14 @@ Next, we use the `cdxt` command `warc` to retrieve the content and save it local
 * By default `cdxt` avoids overwriting existing files by automatically incrementing the counter in the filename. If you run this again without deleting `TEST-000000.extracted.warc.gz`, the data will be written again to a new file `TEST-000001.extracted.warc.gz`.
 * Limit, timestamp, and crawl index args, as well as URL wildcards, work as for `iter`.
 
-### Indexing the WARC and viewing its contents
+### Indexing the WARC
 
-Finally, we run `cdxj-indexer` on this new WARC to make a CDXJ index of it as in Task 3, and then iterate over the WARC using `warcio-iterator.py` as in Task 2.
+We now run `cdxj-indexer` on our new `TEST-000000.extracted.warc.gz` to make a CDXJ index of it as in Task 3. 
+* Note that because the WARC includes metadata that is dynamically generated, you may see a slightly different value for `offset` than the one shown in the output above.
+
+### View the CDXJ index
+
+Finally, we iterate over the WARC using `warcio-iterator.py` as in Task 2.
 
 ## Task 7: Find the right part of the columnar index 
 
