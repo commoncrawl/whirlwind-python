@@ -350,14 +350,14 @@ The output looks like this:
   <summary>Click to view output</summary>
 
 ```
-lookup captures for the given url in the commoncrawl cdx index for CC-MAIN-2024-22, returning only the first match
-cdxt --limit 1 --crawl CC-MAIN-2024-22 iter an.wikipedia.org/wiki/Escopete
+demonstrate that we have this entry in the index
+cdxt --crawl CC-MAIN-2024-22 --from 20240518015810 --to 20240518015810 iter an.wikipedia.org/wiki/Escopete
 status 200, timestamp 20240518015810, url https://an.wikipedia.org/wiki/Escopete
 
 cleanup previous work
 rm -f TEST-000000.extracted.warc.gz
 retrieve the content from the commoncrawl s3 bucket
-cdxt --limit 1 --crawl CC-MAIN-2024-22 warc an.wikipedia.org/wiki/Escopete
+cdxt --crawl CC-MAIN-2024-22 --from 20240518015810 --to 20240518015810 warc an.wikipedia.org/wiki/Escopete
 
 index this new warc
 cdxj-indexer TEST-000000.extracted.warc.gz  > TEST-000000.extracted.warc.cdxj
@@ -377,14 +377,15 @@ There's a lot going on here so let's unpack it a little.
 
 #### Check that the crawl has a record for the page we are interested in
 
-We check for capture results using the `cdxt` command `iter`, specifying the exact URL `an.wikipedia.org/wiki/Escopete` and the crawl identifier `CC-MAIN-2024-22`. The result of this tells us that the crawl successfuly fetched this page at timestamp `20240518015810`.
-* You can try removing the `--limit 1` flag and/or replacing `--crawl CC-MAIN-2024-22` with `--cc`, which will return more results reflecting more times when this URL was crawled. 
-* You can also use `--from <timestamp>` and `--to <timestamp>` to restrict the time range when the URL was crawled. This can even be used to pinpoint an exact record — for example, `--from 20240518015810 --to 20240518015810` will only ever return the record that we've been looking at elsewhere in this tutorial.
+We check for capture results using the `cdxt` command `iter`, specifying the exact URL `an.wikipedia.org/wiki/Escopete` and the timestamp range `--from 20240518015810 --to 20240518015810`. The result of this tells us that the crawl successfuly fetched this page at timestamp `20240518015810`. 
+* Captures are named by the surtkey and the time.
+* Instead of `--crawl CC-MAIN-2024-22`, you could pass `--cc` to search across all crawls.
+* You can pass `--limit <N>` to limit the number of results returned - in this case because we have restricted the timestamp range to a single value, we only expect one result.
 * URLs may be specified with wildcards to return even more results: `"an.wikipedia.org/wiki/Escop*"` matches `an.wikipedia.org/wiki/Escopulión` and `an.wikipedia.org/wiki/Escopete`.
 
 #### Retrieve the fetched content as WARC
 
-Next, we use the `cdxt` command `warc` to retrieve the content and save it locally as a new WARC file, again specifying the exact URL and crawl identifier. This creates the WARC file `TEST-000000.extracted.warc.gz` which contains a `warcinfo` record explaining what the WARC is, followed by the `response` record we requested. 
+Next, we use the `cdxt` command `warc` to retrieve the content and save it locally as a new WARC file, again specifying the exact URL, crawl identifier, and timestamp range. This creates the WARC file `TEST-000000.extracted.warc.gz` which contains a `warcinfo` record explaining what the WARC is, followed by the `response` record we requested. 
 * If you dig into cdx_toolkit's code, you'll find that it is using the offset and length of the WARC record (as returned by the CDX index query) to make a HTTP byte range request to S3 that isolates and returns just the single record we want from the full file. It only downloads the response WARC record because our CDX index only has the response records indexed.
 * By default `cdxt` avoids overwriting existing files by automatically incrementing the counter in the filename. If you run this again without deleting `TEST-000000.extracted.warc.gz`, the data will be written again to a new file `TEST-000001.extracted.warc.gz`.
 * Limit, timestamp, and crawl index args, as well as URL wildcards, work as for `iter`.
