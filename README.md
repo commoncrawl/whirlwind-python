@@ -28,6 +28,8 @@ and [duckdb](https://duckdb.org/).
 
 We use a [Makefile](https://makefiletutorial.com) to provide many of the commands needed to run this tutorial. To see what commands are being run, open the `Makefile` and find the relevant target: e.g. `make install` runs `pip install -r requirements.txt`.
 
+Alternatively, a [notebook version](https://github.com/commoncrawl/whirlwind-python-notebook) of this tutorial is also available.
+
 Let's get started!
 
 ## Task 0: Set-up
