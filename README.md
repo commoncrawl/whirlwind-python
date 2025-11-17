@@ -1,6 +1,6 @@
 # Whirlwind Tour of Common Crawl's Datasets using Python
 
-The Common Crawl corpus contains petabytes of crawl data, including raw web page data, metadata extracts, and text extracts. Common Crawl's data storage is a little complicated, as you might expect for such a large and rich dataset. We make our crawl data available in a variety of formats (WARC, WET, WAT) and we also have two index files of the crawled webpages: CDXJ and columnar.
+The Common Crawl corpus contains petabytes of crawl data, including raw web page data, metadata, and parsed text. Common Crawl's data storage is a little complicated, as you might expect for such a large and rich dataset. We make our crawl data available in a variety of formats (WARC, WET, WAT) and we also have two index files of the crawled webpages: CDXJ and columnar.
 ```mermaid
 flowchart TD
     WEB["WEB"] -- crawler --> cc["Common Crawl"]
@@ -87,15 +87,15 @@ You'll see four records total, with the start of each record marked with the hea
 
 ### WET
 
-WET (WARC Encapsulated Text) files only contain the body text of web pages extracted from the HTML and exclude any HTML code, images, or other media. This makes them useful for text analysis and natural language processing (NLP) tasks.
+WET (WARC Encapsulated Text) files only contain the body text of web pages parsed from the HTML and exclude any HTML code, images, or other media. This makes them useful for text analysis and natural language processing (NLP) tasks.
 
 Open `whirlwind.warc.wet`: this is the WET derived from our original WARC. We can see that it's still in WARC format with two records: 
 1) a `warcinfo` record.
-2) a `conversion` record: the extracted text with the HTTP headers removed.
+2) a `conversion` record: the parsed text with HTTP headers removed.
 
 ### WAT
 
-WAT (Web ARChive Timestamp) files contain metadata associated with the crawled web pages (e.g. parsed data from the HTTP response headers, links extracted from HTML pages, server response codes etc.). They are useful for analysis that requires understanding the structure of the web.
+WAT (Web ARChive Timestamp) files contain metadata associated with the crawled web pages (e.g. parsed data from the HTTP response headers, links recovered from HTML pages, server response codes etc.). They are useful for analysis that requires understanding the structure of the web.
 
 Open `whirlwind.warc.wat`: this is the WAT derived from our original WARC. Like the WET file, it's also in WARC format. It contains two records:
 1) a `warcinfo` record.
@@ -217,9 +217,9 @@ For each of these records, there's one text line in the index - yes, it's a flat
 
 What is the purpose of this funky format? It's done this way because these flat files (300 gigabytes total per crawl) can be sorted on the primary key using any out-of-core sort utility e.g. the standard Linux `sort`, or one of the Hadoop-based out-of-core sort functions.
 
-The JSON blob has enough information to extract individual records: it says which warc file the record is in, and the offset and length of the record. We'll use that in the next section.
+The JSON blob has enough information to cleanly isolate the raw data of a single record: it defines which WARC file the record is in, and the byte offset and length of the record within this file. We'll use that in the next section.
 
-## Task 4: Use the CDXJ index to extract raw content from the local WARC, WET, and WAT 
+## Task 4: Use the CDXJ index to extract a subset of raw content from the local WARC, WET, and WAT 
 
 Normally, compressed files aren't random access. However, the WARC files use a trick to make this possible, which is that every record needs to be separately compressed. The `gzip` compression utility supports this, but it's rarely used.
 
@@ -350,18 +350,19 @@ The output looks like this:
   <summary>Click to view output</summary>
 
 ```
-look up this capture in the comoncrawl cdx index for CC-MAIN-2024-22, returning only the first match:
-cdxt --limit 1 --crawl CC-MAIN-2024-22 --from 20240518015810 --to 20240518015810 iter an.wikipedia.org/wiki/Escopete
+demonstrate that we have this entry in the index
+cdxt --crawl CC-MAIN-2024-22 --from 20240518015810 --to 20240518015810 iter an.wikipedia.org/wiki/Escopete
 status 200, timestamp 20240518015810, url https://an.wikipedia.org/wiki/Escopete
 
-extract the content from the commoncrawl s3 bucket
+cleanup previous work
 rm -f TEST-000000.extracted.warc.gz
-cdxt --cc --from 20240518015810 --to 20240518015810 warc an.wikipedia.org/wiki/Escopete
+retrieve the content from the commoncrawl s3 bucket
+cdxt --crawl CC-MAIN-2024-22 --from 20240518015810 --to 20240518015810 warc an.wikipedia.org/wiki/Escopete
 
 index this new warc
 cdxj-indexer TEST-000000.extracted.warc.gz  > TEST-000000.extracted.warc.cdxj
 cat TEST-000000.extracted.warc.cdxj
-org,wikipedia,an)/wiki/escopete 20240518015810 {"url": "https://an.wikipedia.org/wiki/Escopete", "mime": "text/html", "status": "200", "digest": "sha1:RY7PLBUFQNI2FFV5FTUQK72W6SNPXLQU", "length": "17455", "offset": "379", "filename": "TEST-000000.extracted.warc.gz"}
+org,wikipedia,an)/wiki/escopete 20240518015810 {"url": "https://an.wikipedia.org/wiki/Escopete", "mime": "text/html", "status": "200", "digest": "sha1:RY7PLBUFQNI2FFV5FTUQK72W6SNPXLQU", "length": "17455", "offset": "406", "filename": "TEST-000000.extracted.warc.gz"}
 
 iterate this new warc
 python ./warcio-iterator.py TEST-000000.extracted.warc.gz
@@ -372,9 +373,26 @@ python ./warcio-iterator.py TEST-000000.extracted.warc.gz
 
 </details>
 
-We look up the capture using the `cdxt` commands by specifying the exact URL (`an.wikipedia.org/wiki/Escopete`) and the date of its capture (20240518015810). The output is the WARC file `TEST-000000.extracted.warc.gz` which contains a `warcinfo` record explaining what the WARC is, followed by the `response` record we requested. The Makefile target then runs `cdxj-indexer` on this new WARC to make a CDXJ index of it as in Task 3, and finally iterates over the WARC using `warcio-iterator.py` as in Task 2.
+There's a lot going on here so let's unpack it a little.
 
-If you dig into cdx_toolkit's code, you'll find that it is using the offset and length of the WARC record, as returned by the CDX index query, to make a HTTP byte range request to S3 to download the single WARC record we want. It only downloads the response WARC record because our CDX index only has the response records indexed.
+#### Check that the crawl has a record for the page we are interested in
+
+We check for capture results using the `cdxt` command `iter`, specifying the exact URL `an.wikipedia.org/wiki/Escopete` and the timestamp range `--from 20240518015810 --to 20240518015810`. The result of this tells us that the crawl successfuly fetched this page at timestamp `20240518015810`. 
+* Captures are named by the surtkey and the time.
+* Instead of `--crawl CC-MAIN-2024-22`, you could pass `--cc` to search across all crawls.
+* You can pass `--limit <N>` to limit the number of results returned - in this case because we have restricted the timestamp range to a single value, we only expect one result.
+* URLs may be specified with wildcards to return even more results: `"an.wikipedia.org/wiki/Escop*"` matches `an.wikipedia.org/wiki/Escopulión` and `an.wikipedia.org/wiki/Escopete`.
+
+#### Retrieve the fetched content as WARC
+
+Next, we use the `cdxt` command `warc` to retrieve the content and save it locally as a new WARC file, again specifying the exact URL, crawl identifier, and timestamp range. This creates the WARC file `TEST-000000.extracted.warc.gz` which contains a `warcinfo` record explaining what the WARC is, followed by the `response` record we requested. 
+* If you dig into cdx_toolkit's code, you'll find that it is using the offset and length of the WARC record (as returned by the CDX index query) to make a HTTP byte range request to S3 that isolates and returns just the single record we want from the full file. It only downloads the response WARC record because our CDX index only has the response records indexed.
+* By default `cdxt` avoids overwriting existing files by automatically incrementing the counter in the filename. If you run this again without deleting `TEST-000000.extracted.warc.gz`, the data will be written again to a new file `TEST-000001.extracted.warc.gz`.
+* Limit, timestamp, and crawl index args, as well as URL wildcards, work as for `iter`.
+
+### Indexing the WARC and viewing its contents
+
+Finally, we run `cdxj-indexer` on this new WARC to make a CDXJ index of it as in Task 3, and then iterate over the WARC using `warcio-iterator.py` as in Task 2.
 
 ## Task 7: Find the right part of the columnar index 
 
