@@ -21,7 +21,7 @@ In the Whirlwind Tour, we will:
 2) play with some useful Python packages for interacting with the data: [warcio](https://github.com/webrecorder/warcio), [cdxj-indexer](https://github.com/webrecorder/cdxj-indexer), 
 [cdx_toolkit](https://github.com/cocrawler/cdx_toolkit),
 and [duckdb](https://duckdb.org/).
-3) learn about how the data is compressed to allow random access.
+3) learn about how the data is compressed in an unusual way, to allow random access.
 4) use the CDXJ index and the columnar index to access the data we want.
 
 **Prerequisites:** To get the most out of this tour, you should be comfortable with Python3, running commands on the command line, and basic SQL. Some knowledge of HTTP requests and HTML is also helpful but not essential. We assume you have [make](https://www.gnu.org/software/make/) and [virtualenv](https://pypi.org/project/virtualenv/) installed.
@@ -223,11 +223,18 @@ The JSON blob has enough information to cleanly isolate the raw data of a single
 
 ## Task 4: Use the CDXJ index to extract a subset of raw content from the local WARC, WET, and WAT 
 
-Normally, compressed files aren't random access. However, the WARC files use a trick to make this possible, which is that every record needs to be separately compressed. The `gzip` compression utility supports this, but it's rarely used.
+Normally, compressed files aren't random access -- if you want to read the content near the end of a
+compressed file, you have to decompress everything up to the content that you actually want. This
+would make fetching a subset of the data very expensive.
 
-To extract one record from a warc file, all you need to know is the filename and the offset into the file. If you're reading over the web, then it really helps to know the exact length of the record.
+Instead of normal whole-file compression, WARC files use "one weird trick" -- two gzipped files concatenated together
+are a valid gzip file. And if you know the byte offset of the second file, you can seek to that offset and
+then ungzip just the second file's contents.
 
-Run:
+WARC.gz files do this trick for every WARC record. When reading, the CDXJ index (that we built in Task 3) contains the byte offsets
+and lengths for every record.
+
+Let's extract some individual records from our warc.gz files. Run:
 
 ```make extract```
 
@@ -254,7 +261,8 @@ Notice that we extracted HTML from the WARC, text from WET, and JSON from the WA
 
 ## Task 5: Wreck the WARC by compressing it wrong
 
-As mentioned earlier, WARC/WET/WAT files look like they're gzipped, but they're actually gzipped in a particular way that allows random access. This means that you can't `gunzip` and then `gzip` a warc without wrecking random access. This example:
+As mentioned earlier, WARC/WET/WAT files look like they're normal gzipped files, but they're actually gzipped in a particular way that allows random access.
+This means that you can't `gunzip` and then `gzip` a warc without wrecking random access. This example:
 
 * creates a copy of one of the warc files in the repo
 * uncompresses it
