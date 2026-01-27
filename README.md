@@ -58,10 +58,6 @@ Next, let's install the necessary software for this tour:
 
 This command will print out a screen-full of output and install the Python packages in `requirements.txt` to your venv.
 
-### Install and configure AWS-CLI
-
-We will use the AWS Command Line Interface (CLI) later in the tour to access the data stored in Common Crawl's S3 bucket. Instructions on how to install the AWS-CLI and configure your account are available on the [AWS website](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html). 
-
 ## Task 1: Look at the crawl data
 
 Common Crawl's website includes a [Get Started](https://commoncrawl.org/get-started) guide which summarises different ways to access the data and the file formats. We can use the dropdown menu to access the links for downloading crawls over HTTP(S):
