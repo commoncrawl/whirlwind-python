@@ -17,6 +17,7 @@ flowchart TD
 The goal of this whirlwind tour is to show you how a single webpage appears in all of these different places. That webpage is [https://an.wikipedia.org/wiki/Escopete](https://an.wikipedia.org/wiki/Escopete), which we crawled on the date 2024-05-18T01:58:10Z. On the way, we'll also explore the file formats we use and learn about some useful tools for interacting with our data!
 
 In the Whirlwind Tour, we will:
+
 1) explore the WARC, WET and WAT file formats used to store Common Crawl's data.
 2) play with some useful Python packages for interacting with the data: [warcio](https://github.com/webrecorder/warcio), [cdxj-indexer](https://github.com/webrecorder/cdxj-indexer), 
 [cdx_toolkit](https://github.com/cocrawler/cdx_toolkit),
@@ -175,7 +176,7 @@ The output has three sections, one each for the WARC, WET, and WAT. For each one
 
 ## Task 3: Index the WARC, WET, and WAT
 
-The example WARC files we've been using are tiny and easy to work with. The real WARC files are around a gigabyte in size and contain about 30,000 webpages each. What's more, we have around 24 million of these files! To read all of them, we could iterate, but what if we wanted random access so we could read just one particular record? We do that with an index. 
+The example WARC files we've been using are tiny and easy to work with. The real WARC files are around a gigabyte in size and contain about 30,000 webpages each. What's more, we have around 24 million of these files! To read all of them, we could iterate, but what if we wanted random access so we could read just one particular record? We do that with an index.
 ```mermaid
 flowchart LR
     warc --> indexer --> cdxj & columnar
@@ -340,7 +341,7 @@ python ./warcio-iterator.py testing.warc.gz
 
 Make sure you compress WARCs the right way!
 
-## Task 6: Use cdx_toolkit to query the full CDX index and download those captures from AWS S3
+## Task 6: Use cdx_toolkit to query the full CDX index and download those captures
 
 Some of our users only want to download a small subset of the crawl. They want to run queries against an index, either the CDX index we just talked about, or in the columnar index, which we'll talk about later.
 
@@ -400,7 +401,7 @@ Next, we use the `cdxt` command `warc` to retrieve the content and save it local
 
 Finally, we run `cdxj-indexer` on this new WARC to make a CDXJ index of it as in Task 3, and then iterate over the WARC using `warcio-iterator.py` as in Task 2.
 
-## Task 7: Find the right part of the columnar index 
+## Task 7: Find the right part of the columnar index
 
 Now let's look at the columnar index, the other kind of index that Common Crawl makes available. This index is stored in parquet files so you can access it using SQL-based tools like AWS Athena and duckdb as well as through tables in your favorite table packages such as pandas, pyarrow, and polars.
 
