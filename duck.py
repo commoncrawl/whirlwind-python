@@ -70,7 +70,6 @@ def get_files(algo, crawl):
         files = f'https://data.commoncrawl.org/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/*.parquet'
         raise NotImplementedError('duckdb will throw an error because it cannot glob this')
     elif algo == 'cloudfront':
-        prefix = f's3://commoncrawl/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/'
         external_prefix = f'https://data.commoncrawl.org/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/'
         file_file = f'{crawl}.warc.paths.gz'
 
