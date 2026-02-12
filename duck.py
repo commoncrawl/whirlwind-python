@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import time
 import glob
 import json
@@ -48,23 +50,15 @@ def print_row_as_kv_list(row):
 all_algos = ('s3_glob', 'local_files', 'ccf_local_files', 'cloudfront_glob', 'cloudfront')
 
 
-def get_files(algo, crawl):
+def get_files(algo, crawl, local_prefix=None):
     if algo == 's3_glob':
         # 403 errors with and without credentials. you have to be commoncrawl-pds
         files = f's3://commoncrawl/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/*.parquet'
         raise NotImplementedError('will cause a 403')
     elif algo == 'local_files':
-        files = os.path.expanduser(f'~/commmoncrawl/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/*.parquet')
-        files = glob.glob(files)
-        # did we already download? we expect 300 files of about a gigabyte
-        if len(files) < 250:
-            index_download_advice('~', crawl)
-            exit(1)
+        files = [str(f) for f in Path(os.path.expanduser(f'{local_prefix}')).rglob('*.parquet')]
     elif algo == 'ccf_local_files':
-        files = glob.glob(f'/home/cc-pds/commoncrawl/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/*.parquet')
-        if len(files) < 250:
-            index_download_advice('/home/cc-pds', crawl)
-            exit(1)
+        files = [str(f) for f in Path(f'/home/cc-pds/commoncrawl/cc-index/table/cc-main/warc').rglob('*.parquet')]
     elif algo == 'cloudfront_glob':
         # duckdb can't glob this, same reason as s3_glob above
         files = f'https://data.commoncrawl.org/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/*.parquet'
@@ -82,12 +76,12 @@ def get_files(algo, crawl):
     return files
 
 
-def main(algo, crawl):
+def main(algo, crawl, local_prefix=None):
     windows = True if platform.system() == 'Windows' else False
     if windows:
         # windows stdout is often cp1252
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-    files = get_files(algo, crawl)
+    files = get_files(algo, crawl, local_prefix)
     retries_left = 100
 
     while True:
@@ -113,7 +107,7 @@ def main(algo, crawl):
     retries_left = 100
     while True:
         try:
-            print(duckdb.sql('SELECT COUNT(*) FROM ccindex;'))
+            print(duckdb.sql(f"SELECT COUNT(*) FROM ccindex WHERE subset = 'warc' and crawl = '{crawl}';"))
             break
         except duckdb.InvalidInputException as e:
             # duckdb.duckdb.InvalidInputException: Invalid Input Error: No magic bytes found at end of file 'https://...'
@@ -176,13 +170,21 @@ def main(algo, crawl):
 
 if __name__ == '__main__':
     crawl = 'CC-MAIN-2024-22'
+    local_prefix = None
     if len(sys.argv) > 1:
         algo = sys.argv[1]
         if algo == 'help':
             print('possible algos:', all_algos)
             exit(1)
+        elif algo == 'local_files':
+            if len(sys.argv) < 2:
+                print('for local_files algo, you must provide a local prefix as the second argument')
+                exit(1)
+            else:
+                local_prefix = sys.argv[2]
+                print(f"Using local prefix {local_prefix}")
     else:
         algo = 'cloudfront'
         print('using algo: ', algo)
 
-    main(algo, crawl)
+    main(algo, crawl, local_prefix)
