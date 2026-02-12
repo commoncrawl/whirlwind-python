@@ -549,9 +549,54 @@ The program then writes that one record into a local Parquet file, does a second
 
 ### Bonus: download a full crawl index and query with DuckDB
 
-If you want to run many of these queries, and you have a lot of disk space, you'll want to download the 300 gigabyte index and query it repeatedly. Run
+In case you want to run many of these queries, and you have a lot of disk space, you'll want to download the 300 gigabyte index and query it repeatedly. 
 
-```make duck_local_files```
+> [!IMPORTANT]
+> If you happen to be using the Common Crawl Foundation development server, we've already downloaded these files, and you can run ```make duck_ccf_local_files```
+
+To download the crawl index, there are two options: if you have access to the CCF AWS buckets, run: 
+
+```shell
+mkdir -p 'crawl=CC-MAIN-2024-22/subset=warc'
+aws s3 sync s3://commoncrawl/cc-index/table/cc-main/warc/crawl=CC-MAIN-2024-22/subset=warc/ 'crawl=CC-MAIN-2024-22/subset=warc'
+```
+
+If, by any other chance, you don't have access through the AWS CLI:
+
+```shell
+mkdir -p 'crawl=CC-MAIN-2024-22/subset=warc'
+cd 'crawl=CC-MAIN-2024-22/subset=warc'
+
+wget https://data.commoncrawl.org/crawl-data/CC-MAIN-2024-22/cc-index-table.paths.gz
+gunzip cc-index-table.paths.gz
+
+grep 'subset=warc' cc-index-table.paths | \
+  awk '{print "https://data.commoncrawl.org/" $1, $1}' | \
+  xargs -n 2 -P 10 sh -c '
+    echo "Downloading: $2"
+    mkdir -p "$(dirname "$2")" &&
+    wget -O "$2" "$1"
+  ' _
+
+rm cc-index-table.paths
+cd -
+```
+
+In both ways, the file structure should be something like this: 
+```shell
+tree my_data
+my_data
+└── crawl=CC-MAIN-2024-22
+    └── subset=warc
+        ├── part-00000-4dd72944-e9c0-41a1-9026-dfd2d0615bf2.c000.gz.parquet
+        ├── part-00001-4dd72944-e9c0-41a1-9026-dfd2d0615bf2.c000.gz.parquet
+        ├── part-00002-4dd72944-e9c0-41a1-9026-dfd2d0615bf2.c000.gz.parquet
+```
+
+
+Then run:
+
+Then, you can run `make duck_local_files LOCAL_DIR=/path/to/the/downloaded/data` to run the same query as above, but this time using your local copy of the index files.
 
 If the files aren't already downloaded, this command will give you
 download instructions.
