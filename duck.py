@@ -119,17 +119,17 @@ def main(algo, crawl, local_prefix=None):
             else:
                 raise
 
-    sq2 = f'''
+    sq2 = f"""
     select
       *
     from ccindex
     where subset = 'warc'
-      and crawl = 'CC-MAIN-2024-22'
+      and crawl = '{crawl}'
       and url_host_tld = 'org' -- help the query optimizer
       and url_host_registered_domain = 'wikipedia.org' -- ditto
       and url = 'https://an.wikipedia.org/wiki/Escopete'
     ;
-    '''
+    """
 
     row2 = duckdb.sql(sq2)
     print('our one row')
