@@ -560,7 +560,8 @@ To download the crawl index, please use [cc-downloader](https://github.com/commo
 cargo install cc-downloader
 ```
 
-cc-downloader will not be set up on your path by default, but you can run it by prepending the right path. 
+`cc-downloader` will not be set up on your path by default, but you can run it by prepending the right path.
+If cargo is not available or does not install, please check on [the cc-downloader official repository](https://github.com/commoncrawl/cc-downloader).  
 
 ```shell
 mkdir crawl
