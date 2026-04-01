@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import time
-import glob
 import json
 import os.path
 import sys
@@ -12,11 +11,13 @@ import io
 import duckdb
 
 
-def index_download_advice(prefix, crawl):
+def index_download_advice(local_prefix, crawl):
     print('Do you need to download this index?')
-    print(f' mkdir -p {prefix}/commmoncrawl/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/')
-    print(f' cd {prefix}/commmoncrawl/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/')
-    print(f' aws s3 sync s3://commoncrawl/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/ .')
+    print('The recommended way is to use cc-downloader https://github.com/commoncrawl/cc-downloader')
+    print('If you have cargo and Rust already installed: `cargo install cc-downloader` '
+          '(alternatively, the binaries are available on the GitHub repository) , and then, ')
+    print(f'  ~/.cargo/bin/cc-downloader download-paths {crawl} cc-index-table {local_prefix}')
+    print(f'  ~/.cargo/bin/cc-downloader download {local_prefix}/cc-index-table.paths.gz --progress {local_prefix}')
 
 
 def print_row_as_cdxj(row):
@@ -57,8 +58,18 @@ def get_files(algo, crawl, local_prefix=None):
         raise NotImplementedError('will cause a 403')
     elif algo == 'local_files':
         files = [str(f) for f in Path(os.path.expanduser(f'{local_prefix}')).rglob('*.parquet')]
+        # Check whether the local files have been already downloaded.
+        # We expect 300 files of about a gigabyte
+        if len(files) < 250:
+            index_download_advice(local_prefix, crawl)
+            exit(1)
     elif algo == 'ccf_local_files':
         files = [str(f) for f in Path(f'/home/cc-pds/commoncrawl/cc-index/table/cc-main/warc').rglob('*.parquet')]
+        # Check whether the local files have been already downloaded
+        # We expect 300 files of about a gigabyte
+        if len(files) < 250:
+            index_download_advice('/home/cc-pds/', crawl)
+            exit(1)
     elif algo == 'cloudfront_glob':
         # duckdb can't glob this, same reason as s3_glob above
         files = f'https://data.commoncrawl.org/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/*.parquet'
