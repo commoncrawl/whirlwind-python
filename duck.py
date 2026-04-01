@@ -68,7 +68,7 @@ def get_files(algo, crawl, local_prefix=None):
         # Check whether the local files have been already downloaded
         # We expect 300 files of about a gigabyte
         if len(files) < 250:
-            index_download_advice('/home/cc-pds/', crawl)
+            index_download_advice('/home/cc-pds', crawl)
             exit(1)
     elif algo == 'cloudfront_glob':
         # duckdb can't glob this, same reason as s3_glob above
