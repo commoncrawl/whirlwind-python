@@ -554,14 +554,18 @@ In case you want to run many of these queries, and you have a lot of disk space,
 > [!IMPORTANT]
 > If you happen to be using the Common Crawl Foundation development server, we've already downloaded these files, and you can run ```make duck_ccf_local_files```
 
-To download the crawl index, please use [cc-downloader](https://github.com/commoncrawl/cc-downloader), which is a polite downloader for Common Crawl data:  
+To download the crawl index, please use [cc-downloader](https://github.com/commoncrawl/cc-downloader), which is the official and recommended downloader for Common Crawl data.   
 
+The simplest way to install `cc-downloader` is through cargo, the Rust package manager. If you have Rust installed, you can run:
+ 
 ```shell
 cargo install cc-downloader
 ```
 
-`cc-downloader` will not be set up on your path by default, but you can run it by prepending the right path.
-If cargo is not available or does not install, please check on [the cc-downloader official repository](https://github.com/commoncrawl/cc-downloader).  
+> [!WARNING] 
+> `cc-downloader` will not be set up on your path by default, but you can run it by prepending the right path.
+
+If cargo is not available or does not install, you can download the binaries, please check on [the cc-downloader official repository](https://github.com/commoncrawl/cc-downloader).  
 
 ```shell
 mkdir crawl
