@@ -1,4 +1,4 @@
-warcio
+warcio[s3]>=1.8.0
 cdx_toolkit
 duckdb
 pyarrow

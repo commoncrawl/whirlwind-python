@@ -174,6 +174,51 @@ python ./warcio-iterator.py whirlwind.warc.wat.gz
 
 The output has three sections, one each for the WARC, WET, and WAT. For each one, it prints the record types we saw before, plus the `WARC-Target-URI` for those record types that have it.
 
+### Task 2-i: Iterating over "Remote" Files
+So far we've been working with small local WARC files. But Common Crawl's real WARC files live on AWS S3. Since warcio 1.8, you can iterate over remote files exactly the same way as local ones — no download step required. We can do this over HTTPS or S3.
+
+If you have AWS credentials configured, you can stream directly from S3, which is faster if you're running on AWS. Although the S3 bucket is public, but S3 access still requires AWS credentials.
+
+`make iterate-remote-s3`
+
+<details>
+  <summary>Click to view output</summary>
+```
+iterating over remote warcs over s3:
+
+warc:
+python ./warcio-iterator.py s3://commoncrawl-dev/whirlwind-example-files/whirlwind.warc.gz
+  WARC-Type: warcinfo
+  WARC-Type: request
+    WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
+  WARC-Type: response
+    WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
+  WARC-Type: metadata
+    WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
+
+wet:
+python ./warcio-iterator.py s3://commoncrawl-dev/whirlwind-example-files/whirlwind.warc.wet.gz
+  WARC-Type: warcinfo
+  WARC-Type: conversion
+    WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
+
+wat:
+python ./warcio-iterator.py s3://commoncrawl-dev/whirlwind-example-files/whirlwind.warc.wat.gz
+  WARC-Type: warcinfo
+  WARC-Type: metadata
+    WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
+```
+</details>
+
+
+If you don't have credentials configured, the HTTPS version works without any authentication.
+
+`make iterate-remote-https`
+
+<details>
+  <summary>Click to view output</summary>
+</details>
+
 ## Task 3: Index the WARC, WET, and WAT
 
 The example WARC files we've been using are tiny and easy to work with. The real WARC files are around a gigabyte in size and contain about 30,000 webpages each. What's more, we have around 24 million of these files! To read all of them, we could iterate, but what if we wanted random access so we could read just one particular record? We do that with an index.

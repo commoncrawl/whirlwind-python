@@ -22,6 +22,33 @@ iterate:
 	python ./warcio-iterator.py whirlwind.warc.wat.gz
 	@echo
 
+#FIXME: Update s3 locations if moved to public bucket:
+iterate-remote-s3:
+	@echo iterating over remote warcs over https:
+	@echo
+	@echo warc:
+	python ./warcio-iterator.py s3://commoncrawl-dev/whirlwind-example-files/whirlwind.warc.gz
+	@echo
+	@echo wet:
+	python ./warcio-iterator.py s3://commoncrawl-dev/whirlwind-example-files/whirlwind.warc.wet.gz
+	@echo
+	@echo wat:
+	python ./warcio-iterator.py s3://commoncrawl-dev/whirlwind-example-files/whirlwind.warc.wat.gz
+
+
+#FIXME: We need the example files on public s3 bucket for this:
+#iterate-remote-https:
+#	@echo iterating over remote warcs over https:
+#	@echo
+#	@echo warc:
+#	python ./warcio-iterator.py https://data.commoncrawl.org/<HYPOTHETICAL-PREFIX>/whirlwind.warc.gz
+#	@echo
+#	@echo wet:
+#	python ./warcio-iterator.py https://data.commoncrawl.org/<HYPOTHETICAL-PREFIX>/whirlwind.warc.wet.gz
+#	@echo
+#	@echo wat:
+#	python ./warcio-iterator.py https://data.commoncrawl.org/<HYPOTHETICAL-PREFIX>/whirlwind.warc.wat.gz
+
 cdxj:
 	@echo "creating *.cdxj index files from the local warcs"
 	cdxj-indexer whirlwind.warc.gz > whirlwind.warc.cdxj
