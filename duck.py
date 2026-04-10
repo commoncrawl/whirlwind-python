@@ -1,5 +1,6 @@
+from pathlib import Path
+
 import time
-import glob
 import json
 import os.path
 import sys
@@ -10,11 +11,13 @@ import io
 import duckdb
 
 
-def index_download_advice(prefix, crawl):
+def index_download_advice(local_prefix, crawl):
     print('Do you need to download this index?')
-    print(f' mkdir -p {prefix}/commmoncrawl/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/')
-    print(f' cd {prefix}/commmoncrawl/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/')
-    print(f' aws s3 sync s3://commoncrawl/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/ .')
+    print('The recommended way is to use cc-downloader https://github.com/commoncrawl/cc-downloader')
+    print('If you have cargo and Rust already installed: `cargo install cc-downloader` '
+          '(alternatively, the binaries are available on the GitHub repository) , and then, ')
+    print(f'  ~/.cargo/bin/cc-downloader download-paths {crawl} cc-index-table {local_prefix}')
+    print(f'  ~/.cargo/bin/cc-downloader download {local_prefix}/cc-index-table.paths.gz --progress {local_prefix}')
 
 
 def print_row_as_cdxj(row):
@@ -48,20 +51,22 @@ def print_row_as_kv_list(row):
 all_algos = ('s3_glob', 'local_files', 'ccf_local_files', 'cloudfront_glob', 'cloudfront')
 
 
-def get_files(algo, crawl):
+def get_files(algo, crawl, local_prefix=None):
     if algo == 's3_glob':
         # 403 errors with and without credentials. you have to be commoncrawl-pds
         files = f's3://commoncrawl/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/*.parquet'
         raise NotImplementedError('will cause a 403')
     elif algo == 'local_files':
-        files = os.path.expanduser(f'~/commmoncrawl/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/*.parquet')
-        files = glob.glob(files)
-        # did we already download? we expect 300 files of about a gigabyte
+        files = [str(f) for f in Path(os.path.expanduser(f'{local_prefix}')).rglob('*.parquet')]
+        # Check whether the local files have been already downloaded.
+        # We expect 300 files of about a gigabyte
         if len(files) < 250:
-            index_download_advice('~', crawl)
+            index_download_advice(local_prefix, crawl)
             exit(1)
     elif algo == 'ccf_local_files':
-        files = glob.glob(f'/home/cc-pds/commoncrawl/cc-index/table/cc-main/warc/crawl={crawl}/subset=warc/*.parquet')
+        files = [str(f) for f in Path(f'/home/cc-pds/commoncrawl/cc-index/table/cc-main/warc').rglob('*.parquet')]
+        # Check whether the local files have been already downloaded
+        # We expect 300 files of about a gigabyte
         if len(files) < 250:
             index_download_advice('/home/cc-pds', crawl)
             exit(1)
@@ -81,12 +86,12 @@ def get_files(algo, crawl):
     return files
 
 
-def main(algo, crawl):
+def main(algo, crawl, local_prefix=None):
     windows = True if platform.system() == 'Windows' else False
     if windows:
         # windows stdout is often cp1252
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-    files = get_files(algo, crawl)
+    files = get_files(algo, crawl, local_prefix)
     retries_left = 100
 
     while True:
@@ -112,7 +117,7 @@ def main(algo, crawl):
     retries_left = 100
     while True:
         try:
-            print(duckdb.sql('SELECT COUNT(*) FROM ccindex;'))
+            print(duckdb.sql(f"SELECT COUNT(*) FROM ccindex WHERE subset = 'warc' and crawl = '{crawl}';"))
             break
         except duckdb.InvalidInputException as e:
             # duckdb.duckdb.InvalidInputException: Invalid Input Error: No magic bytes found at end of file 'https://...'
@@ -124,17 +129,17 @@ def main(algo, crawl):
             else:
                 raise
 
-    sq2 = f'''
+    sq2 = f"""
     select
       *
     from ccindex
     where subset = 'warc'
-      and crawl = 'CC-MAIN-2024-22'
+      and crawl = '{crawl}'
       and url_host_tld = 'org' -- help the query optimizer
       and url_host_registered_domain = 'wikipedia.org' -- ditto
       and url = 'https://an.wikipedia.org/wiki/Escopete'
     ;
-    '''
+    """
 
     row2 = duckdb.sql(sq2)
     print('our one row')
@@ -175,13 +180,21 @@ def main(algo, crawl):
 
 if __name__ == '__main__':
     crawl = 'CC-MAIN-2024-22'
+    local_prefix = None
     if len(sys.argv) > 1:
         algo = sys.argv[1]
         if algo == 'help':
             print('possible algos:', all_algos)
             exit(1)
+        elif algo == 'local_files':
+            if len(sys.argv) < 2:
+                print('for local_files algo, you must provide a local prefix as the second argument')
+                exit(1)
+            else:
+                local_prefix = sys.argv[2]
+                print(f"Using local prefix {local_prefix}")
     else:
         algo = 'cloudfront'
         print('using algo: ', algo)
 
-    main(algo, crawl)
+    main(algo, crawl, local_prefix)

@@ -546,9 +546,46 @@ The program then writes that one record into a local Parquet file, does a second
 
 ### Bonus: download a full crawl index and query with DuckDB
 
-If you want to run many of these queries, and you have a lot of disk space, you'll want to download the 300 gigabyte index and query it repeatedly. Run
+In case you want to run many of these queries, and you have a lot of disk space, you'll want to download the 300 gigabyte index and query it repeatedly. 
 
-```make duck_local_files```
+> [!IMPORTANT]
+> If you happen to be using the Common Crawl Foundation development server, we've already downloaded these files, and you can run ```make duck_ccf_local_files```
+
+To download the crawl index, please use [cc-downloader](https://github.com/commoncrawl/cc-downloader), which is the official and recommended downloader for Common Crawl data.   
+
+The simplest way to install `cc-downloader` is through cargo, the Rust package manager. If you have Rust installed, you can run:
+ 
+```shell
+cargo install cc-downloader
+```
+
+> [!WARNING] 
+> `cc-downloader` will not be set up on your path by default, but you can run it by prepending the right path.
+
+If cargo is not available or does not install, you can download the binaries, please check on [the cc-downloader official repository](https://github.com/commoncrawl/cc-downloader).  
+
+```shell
+mkdir crawl
+~/.cargo/bin/cc-downloader download-paths CC-MAIN-2024-22 cc-index-table crawl
+~/.cargo/bin/cc-downloader download  crawl/cc-index-table.paths.gz --progress crawl
+```
+
+In both ways, the file structure should be something like this: 
+```shell
+tree crawl/
+crawl/
+├── cc-index
+│   └── table
+│       └── cc-main
+│           └── warc
+│               └── crawl=CC-MAIN-2024-22
+│                   └── subset=warc
+│                       ├── part-00000-4dd72944-e9c0-41a1-9026-dfd2d0615bf2.c000.gz.parquet
+│                       ├── part-00000-4dd72944-e9c0-41a1-9026-dfd2d0615bf2.c001.gz.parquet
+```
+
+
+Then, you can run `make duck_local_files LOCAL_DIR=/path/to/the/downloaded/data` to run the same query as above, but this time using your local copy of the index files.
 
 If the files aren't already downloaded, this command will give you
 download instructions.

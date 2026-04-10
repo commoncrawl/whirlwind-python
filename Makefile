@@ -62,11 +62,14 @@ CC-MAIN-2024-22.warc.paths.gz:
 	 aws s3 ls s3://commoncrawl/cc-index/table/cc-main/warc/crawl=CC-MAIN-2024-22/subset=warc/ | awk '{print $$4}' | gzip -9 > CC-MAIN-2024-22.warc.paths.gz
 
 duck_local_files:
+ifndef LOCAL_DIR
+	$(error LOCAL_DIR is required. Usage: make duck_local_files LOCAL_DIR=/path/to/data)
+endif
 	@echo "warning! 300 gigabyte download"
-	python duck.py local_files
+	python duck.py local_files $(LOCAL_DIR)
 
 duck_ccf_local_files:
-	@echo "warning! only works on Common Crawl Foundadtion's development machine"
+	@echo "warning! only works on Common Crawl Foundation's development machine"
 	python duck.py ccf_local_files
 
 duck_cloudfront:
