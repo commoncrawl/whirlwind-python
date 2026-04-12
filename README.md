@@ -174,17 +174,26 @@ python ./warcio-iterator.py whirlwind.warc.wat.gz
 
 The output has three sections, one each for the WARC, WET, and WAT. For each one, it prints the record types we saw before, plus the `WARC-Target-URI` for those record types that have it.
 
+### Iterating over remote files
+
 warcio also supports working on remote files, so let us try the same command on the remote version of the same WARC file we just iterated locally. We will reach this remote file from the Github repository for this tutorial:
 
 `make iterate-remote`
 
 <details>
   <summary>Click to view code</summary>
+
+```
 python ./warcio-iterator.py https://raw.githubusercontent.com/commoncrawl/whirlwind-python/refs/heads/main/whirlwind.warc.gz
+```
 </details>
+
 The output should be identical to what you saw from the local file:
+
 <details>
   <summary>Click to view output</summary>
+
+```
   WARC-Type: warcinfo
   WARC-Type: request
     WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
@@ -192,9 +201,10 @@ The output should be identical to what you saw from the local file:
     WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
   WARC-Type: metadata
     WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
+```
 </details>
 
-We get the same output, but this time by streaming the file over HTTPS instead of reading from local disk. Later in the tour, we will use this capability to index and extract records from remote WARC files hosted on AWS S3 buckets.
+We got the same output, but this time by streaming the file over HTTPS instead of reading from local disk. Later in the tour, we will use this capability to index and extract records from remote WARC files hosted on AWS S3 buckets.
 
 
 ## Task 3: Index the WARC, WET, and WAT
@@ -217,7 +227,7 @@ The CDX index files are sorted plain-text files, with each line containing infor
 
 We can create our own CDXJ index from the local WARCs by running:
 
-```make cdxj```
+`make cdxj`
 
 This uses the [cdxj-indexer](https://github.com/webrecorder/cdxj-indexer) library to generate CDXJ index files for our WARC files by running the code below: 
 
@@ -239,7 +249,28 @@ For each of these records, there's one text line in the index - yes, it's a flat
 
 What is the purpose of this funky format? It's done this way because these flat files (300 gigabytes total per crawl) can be sorted on the primary key using any out-of-core sort utility e.g. the standard Linux `sort`, or one of the Hadoop-based out-of-core sort functions.
 
-The JSON blob has enough information to cleanly isolate the raw data of a single record: it defines which WARC file the record is in, and the byte offset and length of the record within this file. We'll use that in the next section.
+The JSON blob has enough information to cleanly isolate the raw data of a single record: it defines which WARC file the record is in, and the byte offset and length of the record within this file. We'll use that in Task 4, when accessing the contents of the WARC at this offset. But first, let's observe that we could do all of this processing over a remote file location, as before.
+
+
+### Indexing remote WARC files
+
+Through warcio's remote file handling capabilities, `cdxj-indexer` too can work on remote files, and this is true not just Common Crawl's, but any WARC files accessible over HTTPS or S3. As an example, let us check two WARC files from the End-of-Term Web Archive, which preserves U.S. government websites around presidential transitions. We will check one WARC file crawled by the Internet Archive (in the IA-000 segment), and another one repackaged from Common Crawl data (in the CC-000 segment). Let's index a few records from each.
+
+Run:
+
+`make cdxj-remote`
+
+<details>
+  <summary>Click to view code</summary>
+
+```
+cdxj-indexer https://eotarchive.s3.amazonaws.com/crawl-data/EOT-2024/segments/IA-000/warc/EOT24PRE-20240926172119-crawl804_EOT24PRE-20240926172119-00000.warc.gz 2>/dev/null | head -n 10 | tee eot-ia.cdxj
+cdxj-indexer s3://eotarchive/crawl-data/EOT-2024/segments/CC-000/warc/EOT-2024-REPACKAGE-CC-MAIN-2024-42-GOV-000000-001.warc.gz 2>/dev/null | head -n 10 | tee eot-cc.cdxj
+```
+</details>
+
+The first command fetches and indexes a WARC over HTTPS, the second over S3. These real-life WARC files are around 1GB each, so we display and save only the first 10 records.
+
 
 ## Task 4: Use the CDXJ index to extract a subset of raw content from the local WARC, WET, and WAT 
 
@@ -256,7 +287,7 @@ and lengths for every record.
 
 Let's extract some individual records from our warc.gz files. Run:
 
-```make extract```
+`make extract`
 
 to run a set of extractions from your local
 `whirlwind.*.gz` files with `warcio` using the code below:
@@ -278,6 +309,31 @@ The offset numbers in the Makefile are the same
 ones as in the index. Look at the three output files: `extraction.html`, `extraction.txt`, and `extraction.json` (pretty-print the json with `python -m json.tool extraction.json`). 
 
 Notice that we extracted HTML from the WARC, text from WET, and JSON from the WAT (as shown in the different file extensions). This is because the payload in each file type is formatted differently!
+
+
+### Extracting from remote WARC files
+
+The same random access trick works on remote files. By indexing deeper into the EOT WARC files from Task 3 (try increasing the head count, or removing it entirely if you're patient), we can find offsets for specific records and extract them directly — without downloading the entire file.
+
+Run:
+
+`make extract-remote`
+
+<details>
+  <summary>Click to view code</summary>
+
+```
+warcio extract https://eotarchive.s3.amazonaws.com/crawl-data/EOT-2024/segments/IA-000/warc/EOT24PRE-20240926172119-crawl804_EOT24PRE-20240926172119-00000.warc.gz 50755
+warcio extract s3://eotarchive/crawl-data/EOT-2024/segments/CC-000/warc/EOT-2024-REPACKAGE-CC-MAIN-2024-42-GOV-000000-001.warc.gz 18595
+```
+</details>
+
+The first command extracts the record for `https://hpxml.nrel.gov/` (HPXML Toolbox, hosted by the National Renewable Energy Laboratory) from an Internet Archive crawl, fetched over HTTPS. The second extracts the record for `https://before-you-ship.18f.gov/` (18F's pre-launch checklist for government services) from a Common Crawl repackage, fetched over S3.
+
+In both cases, warcio uses the byte offset to seek directly to the right position in the remote file and decompress just that one record. Later in this tutorial we will see the same mechanism being used by `cdx_toolkit` to fetch a specific capture, by looking up the offset in the CDX index, then make a byte-range request to retrieve just the record you want.
+
+**Note:** If you look at the output of the second extraction (`before-you-ship.18f.gov`), you'll notice that despite having an HTTP 200 status in the index, the actual HTML content is just a redirect page pointing to `handbook.tts.gsa.gov`. This is a good reminder that real crawl data is messy, a 200 status in the index doesn't always mean you'll get a full page of content!
+
 
 ## Task 5: Wreck the WARC by compressing it wrong
 

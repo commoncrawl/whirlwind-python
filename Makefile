@@ -1,3 +1,9 @@
+EOT_IA_WARC_HTTPS = https://eotarchive.s3.amazonaws.com/crawl-data/EOT-2024/segments/IA-000/warc/EOT24PRE-20240926172119-crawl804_EOT24PRE-20240926172119-00000.warc.gz
+EOT_IA_WARC_S3    = s3://eotarchive/crawl-data/EOT-2024/segments/IA-000/warc/EOT24PRE-20240926172119-crawl804_EOT24PRE-20240926172119-00000.warc.gz
+EOT_CC_WARC_HTTPS = https://eotarchive.s3.amazonaws.com/crawl-data/EOT-2024/segments/CC-000/warc/EOT-2024-REPACKAGE-CC-MAIN-2024-42-GOV-000000-001.warc.gz
+EOT_CC_WARC_S3    = s3://eotarchive/crawl-data/EOT-2024/segments/CC-000/warc/EOT-2024-REPACKAGE-CC-MAIN-2024-42-GOV-000000-001.warc.gz
+WHIRLWIND_WARC_HTTPS = https://raw.githubusercontent.com/commoncrawl/whirlwind-python/refs/heads/main/whirlwind.warc.gz
+
 venv:
 	@echo "making a venv in ~/venv/whirlwind"
 	mkdir -p ~/venv
@@ -22,32 +28,9 @@ iterate:
 	python ./warcio-iterator.py whirlwind.warc.wat.gz
 	@echo
 
-#FIXME: Update s3 locations if moved to public bucket:
-iterate-remote-s3:
-	@echo iterating over remote warcs over https:
-	@echo
-	@echo warc:
-	python ./warcio-iterator.py s3://commoncrawl-dev/whirlwind-example-files/whirlwind.warc.gz
-	@echo
-	@echo wet:
-	python ./warcio-iterator.py s3://commoncrawl-dev/whirlwind-example-files/whirlwind.warc.wet.gz
-	@echo
-	@echo wat:
-	python ./warcio-iterator.py s3://commoncrawl-dev/whirlwind-example-files/whirlwind.warc.wat.gz
-
-
-#FIXME: We need the example files on public s3 bucket for this:
-#iterate-remote-https:
-#	@echo iterating over remote warcs over https:
-#	@echo
-#	@echo warc:
-#	python ./warcio-iterator.py https://data.commoncrawl.org/<HYPOTHETICAL-PREFIX>/whirlwind.warc.gz
-#	@echo
-#	@echo wet:
-#	python ./warcio-iterator.py https://data.commoncrawl.org/<HYPOTHETICAL-PREFIX>/whirlwind.warc.wet.gz
-#	@echo
-#	@echo wat:
-#	python ./warcio-iterator.py https://data.commoncrawl.org/<HYPOTHETICAL-PREFIX>/whirlwind.warc.wat.gz
+iterate-remote:
+	@echo "iterating over whirlwind.warc.gz from GitHub via HTTPS:"
+	python ./warcio-iterator.py $(WHIRLWIND_WARC_HTTPS)
 
 cdxj:
 	@echo "creating *.cdxj index files from the local warcs"
@@ -55,12 +38,26 @@ cdxj:
 	cdxj-indexer --records conversion whirlwind.warc.wet.gz > whirlwind.warc.wet.cdxj
 	cdxj-indexer whirlwind.warc.wat.gz > whirlwind.warc.wat.cdxj
 
+cdxj-remote:
+	@echo "indexing End-of-Term-2024 Internet Archive WARC over HTTPS (File size ~1GB, showing first 10 records):"
+	cdxj-indexer $(EOT_IA_WARC_HTTPS) 2>/dev/null | head -n 10 | tee eot-ia.cdxj
+	@echo
+	@echo "indexing End-of-Term-2024 Common Crawl repackage WARC over S3 (File size ~1GB, showing first 10 records):"
+	cdxj-indexer $(EOT_CC_WARC_S3) 2>/dev/null | head -n 10 | tee eot-cc.cdxj
+
 extract:
 	@echo "creating extraction.* from local warcs, the offset numbers are from the cdxj index"
 	warcio extract --payload whirlwind.warc.gz 1023 > extraction.html
 	warcio extract --payload whirlwind.warc.wet.gz 466 > extraction.txt
 	warcio extract --payload whirlwind.warc.wat.gz 443 > extraction.json
 	@echo "hint: python -m json.tool extraction.json"
+
+extract-remote:
+	@echo "extracting hpxml.nrel.gov record from End-of-Term Internet Archive WARC over HTTPS (offset 50755):"
+	warcio extract $(EOT_IA_WARC_HTTPS) 50755
+	@echo
+	@echo "extracting before-you-ship.18f.gov record from End-of-Term Common Crawl repackage WARC over S3 (offset 18595):"
+	warcio extract $(EOT_CC_WARC_S3) 18595
 
 cdx_toolkit:
 	@echo demonstrate that we have this entry in the index
