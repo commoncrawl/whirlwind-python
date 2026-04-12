@@ -174,20 +174,17 @@ python ./warcio-iterator.py whirlwind.warc.wat.gz
 
 The output has three sections, one each for the WARC, WET, and WAT. For each one, it prints the record types we saw before, plus the `WARC-Target-URI` for those record types that have it.
 
-### Task 2-i: Iterating over "Remote" Files
-So far we've been working with small local WARC files. But Common Crawl's real WARC files live on AWS S3. Since warcio 1.8, you can iterate over remote files exactly the same way as local ones — no download step required. We can do this over HTTPS or S3.
+warcio also supports working on remote files, so let us try the same command on the remote version of the same WARC file we just iterated locally. We will reach this remote file from the Github repository for this tutorial:
 
-If you have AWS credentials configured, you can stream directly from S3, which is faster if you're running on AWS. Although the S3 bucket is public, but S3 access still requires AWS credentials.
-
-`make iterate-remote-s3`
+`make iterate-remote`
 
 <details>
+  <summary>Click to view code</summary>
+python ./warcio-iterator.py https://raw.githubusercontent.com/commoncrawl/whirlwind-python/refs/heads/main/whirlwind.warc.gz
+</details>
+The output should be identical to what you saw from the local file:
+<details>
   <summary>Click to view output</summary>
-```
-iterating over remote warcs over s3:
-
-warc:
-python ./warcio-iterator.py s3://commoncrawl-dev/whirlwind-example-files/whirlwind.warc.gz
   WARC-Type: warcinfo
   WARC-Type: request
     WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
@@ -195,29 +192,10 @@ python ./warcio-iterator.py s3://commoncrawl-dev/whirlwind-example-files/whirlwi
     WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
   WARC-Type: metadata
     WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
-
-wet:
-python ./warcio-iterator.py s3://commoncrawl-dev/whirlwind-example-files/whirlwind.warc.wet.gz
-  WARC-Type: warcinfo
-  WARC-Type: conversion
-    WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
-
-wat:
-python ./warcio-iterator.py s3://commoncrawl-dev/whirlwind-example-files/whirlwind.warc.wat.gz
-  WARC-Type: warcinfo
-  WARC-Type: metadata
-    WARC-Target-URI https://an.wikipedia.org/wiki/Escopete
-```
 </details>
 
+We get the same output, but this time by streaming the file over HTTPS instead of reading from local disk. Later in the tour, we will use this capability to index and extract records from remote WARC files hosted on AWS S3 buckets.
 
-If you don't have credentials configured, the HTTPS version works without any authentication.
-
-`make iterate-remote-https`
-
-<details>
-  <summary>Click to view output</summary>
-</details>
 
 ## Task 3: Index the WARC, WET, and WAT
 
