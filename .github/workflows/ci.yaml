@@ -63,14 +63,14 @@ jobs:
       - name: make cdxj
         run: make cdxj
 
-      - name: make cdxj-remote
-        run: make cdxj-remote
+      - name: make cdxj-remote-https
+        run: make cdxj-remote-https
 
       - name: make extract
         run: make extract
 
-      - name: make extract-remote
-        run: make extract-remote
+      - name: make extract-remote-https
+        run: make extract-remote-https
 
       - name: make cdx_toolkit
         run: make cdx_toolkit
