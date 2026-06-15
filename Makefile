@@ -41,17 +41,21 @@ cdxj:
 cdxj-remote-https:
 	@echo "indexing End-of-Term-2024 Internet Archive WARC over HTTPS (File size ~1GB, showing first 10 records):"
 	cdxj-indexer $(EOT_IA_WARC_HTTPS) 2>/dev/null | head -n 10 | tee eot-ia.cdxj
+	@test -s eot-ia.cdxj || { echo "ERROR: no records indexed from $(EOT_IA_WARC_HTTPS) -- check network connectivity"; exit 1; }
 	@echo
 	@echo "indexing End-of-Term-2024 Common Crawl repackage WARC over HTTPS (File size ~1GB, showing first 10 records):"
 	cdxj-indexer $(EOT_CC_WARC_HTTPS) 2>/dev/null | head -n 10 | tee eot-cc.cdxj
+	@test -s eot-cc.cdxj || { echo "ERROR: no records indexed from $(EOT_CC_WARC_HTTPS) -- check network connectivity"; exit 1; }
 
 cdxj-remote-s3:
 	@echo "!! this step requires authentication via S3 credentials (even though it is free)"
 	@echo "indexing End-of-Term-2024 Internet Archive WARC over S3 (File size ~1GB, showing first 10 records):"
 	cdxj-indexer $(EOT_IA_WARC_S3) 2>/dev/null | head -n 10 | tee eot-ia.cdxj
+	@test -s eot-ia.cdxj || { echo "ERROR: no records indexed from $(EOT_IA_WARC_S3) -- check network connectivity and S3 credentials"; exit 1; }
 	@echo
 	@echo "indexing End-of-Term-2024 Common Crawl repackage WARC over S3 (File size ~1GB, showing first 10 records):"
 	cdxj-indexer $(EOT_CC_WARC_S3) 2>/dev/null | head -n 10 | tee eot-cc.cdxj
+	@test -s eot-cc.cdxj || { echo "ERROR: no records indexed from $(EOT_CC_WARC_S3) -- check network connectivity and S3 credentials"; exit 1; }
 
 extract:
 	@echo "creating extraction.* from local warcs, the offset numbers are from the cdxj index"

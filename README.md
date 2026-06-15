@@ -268,7 +268,7 @@ cdxj-indexer https://eotarchive.s3.amazonaws.com/crawl-data/EOT-2024/segments/CC
 ```
 </details>
 
-The first command fetches and indexes these two WARC over HTTPS. Since they are both around 1GB each, so we display and save only the first 10 records.
+The first command fetches and indexes these two WARCs over HTTPS. Since they are both around 1GB each, we display and save only the first 10 records.
 
 If you have AWS credentials configured, you can also access the same files over S3, which is faster when running on AWS. Even though you will need AWS credentials for authentication purposes, this process is still free of charge since these are public buckets.
 If you do not have AWS credentials, you can access the same information over HTTPS as described above.
