@@ -1,3 +1,9 @@
+EOT_IA_WARC_HTTPS = https://eotarchive.s3.amazonaws.com/crawl-data/EOT-2024/segments/IA-000/warc/EOT24PRE-20240926172119-crawl804_EOT24PRE-20240926172119-00000.warc.gz
+EOT_IA_WARC_S3    = s3://eotarchive/crawl-data/EOT-2024/segments/IA-000/warc/EOT24PRE-20240926172119-crawl804_EOT24PRE-20240926172119-00000.warc.gz
+EOT_CC_WARC_HTTPS = https://eotarchive.s3.amazonaws.com/crawl-data/EOT-2024/segments/CC-000/warc/EOT-2024-REPACKAGE-CC-MAIN-2024-42-GOV-000000-001.warc.gz
+EOT_CC_WARC_S3    = s3://eotarchive/crawl-data/EOT-2024/segments/CC-000/warc/EOT-2024-REPACKAGE-CC-MAIN-2024-42-GOV-000000-001.warc.gz
+WHIRLWIND_WARC_HTTPS = https://raw.githubusercontent.com/commoncrawl/whirlwind-python/refs/heads/main/whirlwind.warc.gz
+
 venv:
 	@echo "making a venv in ~/venv/whirlwind"
 	mkdir -p ~/venv
@@ -22,11 +28,34 @@ iterate:
 	python ./warcio-iterator.py whirlwind.warc.wat.gz
 	@echo
 
+iterate-remote:
+	@echo "iterating over whirlwind.warc.gz from GitHub via HTTPS:"
+	python ./warcio-iterator.py $(WHIRLWIND_WARC_HTTPS)
+
 cdxj:
 	@echo "creating *.cdxj index files from the local warcs"
 	cdxj-indexer whirlwind.warc.gz > whirlwind.warc.cdxj
 	cdxj-indexer --records conversion whirlwind.warc.wet.gz > whirlwind.warc.wet.cdxj
 	cdxj-indexer whirlwind.warc.wat.gz > whirlwind.warc.wat.cdxj
+
+cdxj-remote-https:
+	@echo "indexing End-of-Term-2024 Internet Archive WARC over HTTPS (File size ~1GB, showing first 10 records):"
+	cdxj-indexer $(EOT_IA_WARC_HTTPS) 2>/dev/null | head -n 10 | tee eot-ia.cdxj
+	@test -s eot-ia.cdxj || { echo "ERROR: no records indexed from $(EOT_IA_WARC_HTTPS) -- check network connectivity"; exit 1; }
+	@echo
+	@echo "indexing End-of-Term-2024 Common Crawl repackage WARC over HTTPS (File size ~1GB, showing first 10 records):"
+	cdxj-indexer $(EOT_CC_WARC_HTTPS) 2>/dev/null | head -n 10 | tee eot-cc.cdxj
+	@test -s eot-cc.cdxj || { echo "ERROR: no records indexed from $(EOT_CC_WARC_HTTPS) -- check network connectivity"; exit 1; }
+
+cdxj-remote-s3:
+	@echo "!! this step requires authentication via S3 credentials (even though it is free)"
+	@echo "indexing End-of-Term-2024 Internet Archive WARC over S3 (File size ~1GB, showing first 10 records):"
+	cdxj-indexer $(EOT_IA_WARC_S3) 2>/dev/null | head -n 10 | tee eot-ia.cdxj
+	@test -s eot-ia.cdxj || { echo "ERROR: no records indexed from $(EOT_IA_WARC_S3) -- check network connectivity and S3 credentials"; exit 1; }
+	@echo
+	@echo "indexing End-of-Term-2024 Common Crawl repackage WARC over S3 (File size ~1GB, showing first 10 records):"
+	cdxj-indexer $(EOT_CC_WARC_S3) 2>/dev/null | head -n 10 | tee eot-cc.cdxj
+	@test -s eot-cc.cdxj || { echo "ERROR: no records indexed from $(EOT_CC_WARC_S3) -- check network connectivity and S3 credentials"; exit 1; }
 
 extract:
 	@echo "creating extraction.* from local warcs, the offset numbers are from the cdxj index"
@@ -34,6 +63,21 @@ extract:
 	warcio extract --payload whirlwind.warc.wet.gz 466 > extraction.txt
 	warcio extract --payload whirlwind.warc.wat.gz 443 > extraction.json
 	@echo "hint: python -m json.tool extraction.json"
+
+extract-remote-https:
+	@echo "extracting hpxml.nrel.gov record from End-of-Term Internet Archive WARC over HTTPS (offset 50755):"
+	warcio extract $(EOT_IA_WARC_HTTPS) 50755
+	@echo
+	@echo "extracting before-you-ship.18f.gov record from End-of-Term Common Crawl repackage WARC over HTTPS (offset 18595):"
+	warcio extract $(EOT_CC_WARC_HTTPS) 18595
+
+extract-remote-s3:
+	@echo "!! this step requires authentication via S3 credentials (even though it is free)"
+	@echo "extracting hpxml.nrel.gov record from End-of-Term Internet Archive WARC over S3 (offset 50755):"
+	warcio extract $(EOT_IA_WARC_S3) 50755
+	@echo
+	@echo "extracting before-you-ship.18f.gov record from End-of-Term Common Crawl repackage WARC over S3 (offset 18595):"
+	warcio extract $(EOT_CC_WARC_S3) 18595
 
 cdx_toolkit:
 	@echo demonstrate that we have this entry in the index
@@ -57,7 +101,7 @@ download_collinfo:
 	curl -O https://index.commoncrawl.org/collinfo.json
 
 CC-MAIN-2024-22.warc.paths.gz:
-	@echo "downloading the list from S3 requires S3 auth (even though it is free)"
+	@echo "!! this step requires authentication via S3 credentials (even though it is free)"
 	@echo "note that this file should already be in the repo"
 	 aws s3 ls s3://commoncrawl/cc-index/table/cc-main/warc/crawl=CC-MAIN-2024-22/subset=warc/ | awk '{print $$4}' | gzip -9 > CC-MAIN-2024-22.warc.paths.gz
 

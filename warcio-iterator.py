@@ -2,10 +2,11 @@
 
 import sys
 
+import fsspec
 from warcio.archiveiterator import ArchiveIterator
 
 for file in sys.argv[1:]:
-    with open(file, 'rb') as stream:
+    with fsspec.open(file, 'rb') as stream:
         for record in ArchiveIterator(stream):
             print(' ', 'WARC-Type:', record.rec_type)
             if record.rec_type in {'request', 'response', 'conversion', 'metadata'}:

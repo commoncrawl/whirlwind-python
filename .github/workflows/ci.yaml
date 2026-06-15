@@ -57,11 +57,20 @@ jobs:
       - name: make iterate
         run: make iterate
 
+      - name: make iterate-remote
+        run: make iterate-remote
+
       - name: make cdxj
         run: make cdxj
 
+      - name: make cdxj-remote-https
+        run: make cdxj-remote-https
+
       - name: make extract
         run: make extract
+
+      - name: make extract-remote-https
+        run: make extract-remote-https
 
       - name: make cdx_toolkit
         run: make cdx_toolkit
