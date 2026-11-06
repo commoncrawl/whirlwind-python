@@ -79,6 +79,16 @@ extract-remote-s3:
 	@echo "extracting before-you-ship.18f.gov record from End-of-Term Common Crawl repackage WARC over S3 (offset 18595):"
 	warcio extract $(EOT_CC_WARC_S3) 18595
 
+export:
+	@echo "exporting record metadata, page text, and links from the local warcs to exporter/output/"
+	mkdir -p exporter/output
+	python exporter/export_records.py whirlwind.warc.gz -o exporter/output/warc.csv
+	python exporter/export_records.py whirlwind.warc.wet.gz -o exporter/output/wet.csv
+	python exporter/export_records.py whirlwind.warc.wat.gz -o exporter/output/wat.csv
+	python exporter/export_records.py whirlwind.warc.gz -f json -o exporter/output/warc.json
+	python exporter/export_records.py whirlwind.warc.wet.gz -m text -o exporter/output/text.csv
+	python exporter/export_records.py whirlwind.warc.gz -m links -o exporter/output/links.csv
+
 cdx_toolkit:
 	@echo demonstrate that we have this entry in the index
 	cdxt --crawl CC-MAIN-2024-22 --from 20240518015810 --to 20240518015810 iter an.wikipedia.org/wiki/Escopete

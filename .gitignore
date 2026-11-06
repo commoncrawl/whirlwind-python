@@ -9,3 +9,5 @@ collinfo.json
 .venv/
 .vscode/
 .idea/
+exporter/output/
+progress.md
